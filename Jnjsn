@@ -1,0 +1,100 @@
+local P, LP, Cam, RS, TS, UIS = game:GetService("Players"), game:GetService("Players").LocalPlayer, workspace.CurrentCamera, game:GetService("RunService"), game:GetService("TweenService"), game:GetService("UserInputService")
+local PG = LP:WaitForChild("PlayerGui")
+if PG:FindFirstChild("AkashiFixedHub") then PG.AkashiFixedHub:Destroy() end
+
+local SG = Instance.new("ScreenGui", PG) SG.Name = "AkashiFixedHub" SG.ResetOnSpawn = false
+local Btn = Instance.new("TextButton", SG) Btn.BackgroundColor3 = Color3.fromRGB(210,0,0) Btn.Position = UDim2.new(0.02,0,0.25,0) Btn.Size = UDim2.new(0,45,0,45) Btn.Font = "GothamBold" Btn.Text = "AK" Btn.TextColor3 = Color3.fromRGB(255,255,255) Btn.TextSize = 18 Instance.new("UICorner", Btn).CornerRadius = UDim.new(1,0) Instance.new("UIStroke", Btn).Color = Color3.fromRGB(255,255,255)
+
+local F = Instance.new("Frame", SG) F.BackgroundColor3 = Color3.fromRGB(255,255,255) F.Position = UDim2.new(0.12,0,0.25,0) F.Size = UDim2.new(0,220,0,325) Instance.new("UICorner", F).CornerRadius = UDim.new(0,8) local S_F = Instance.new("UIStroke", F) S_F.Thickness, S_F.Color = 2, Color3.fromRGB(210,0,0)
+local B = Instance.new("Frame", F) B.BackgroundColor3 = Color3.fromRGB(210,0,0) B.Size = UDim2.new(1,0,0,30) Instance.new("UICorner", B).CornerRadius = UDim.new(0,8)
+local T = Instance.new("TextLabel", B) T.BackgroundTransparency, T.Position, T.Size, T.Font, T.Text, T.TextColor3, T.TextSize, T.TextXAlignment = 1, UDim2.new(0.05,0,0,0), UDim2.new(0.9,0,1,0), "GothamBold", "AKASHI | MINI", Color3.fromRGB(255,255,255), 12, "Left"
+local C = Instance.new("Frame", F) C.BackgroundTransparency, C.Position, C.Size = 1, UDim2.new(0,0,0,30), UDim2.new(1,0,1,-30)
+
+local function createToggle(txt, pos)
+    local g = Instance.new("Frame", C) g.BackgroundColor3, g.Position, g.Size = Color3.fromRGB(245,245,245), pos, UDim2.new(0.9,0,0,32) Instance.new("UICorner", g).CornerRadius = UDim.new(0,4)
+    local l = Instance.new("TextLabel", g) l.BackgroundTransparency, l.Position, l.Size, l.Font, l.Text, l.TextColor3, l.TextSize, l.TextXAlignment = 1, UDim2.new(0.05,0,0,0), UDim2.new(0.6,0,1,0), "GothamSemibold", txt, Color3.fromRGB(60,60,60), 11, "Left"
+    local sw = Instance.new("TextButton", g) sw.BackgroundColor3, sw.Position, sw.Size, sw.Text = Color3.fromRGB(200,200,200), UDim2.new(0.72,0,0.15,0), UDim2.new(0,40,0,20), "" Instance.new("UICorner", sw).CornerRadius = UDim.new(1,0)
+    local b = Instance.new("Frame", sw) b.BackgroundColor3, b.Position, b.Size = Color3.fromRGB(255,255,255), UDim2.new(0,2,0,2), UDim2.new(0,16,0,16) Instance.new("UICorner", b).CornerRadius = UDim.new(1,0)
+    return sw, b
+end
+
+local function createSlider(txt, sV, pos)
+    local g = Instance.new("Frame", C) g.BackgroundColor3, g.Position, g.Size = Color3.fromRGB(245,245,245), pos, UDim2.new(0.9,0,0,38) Instance.new("UICorner", g).CornerRadius = UDim.new(0,4)
+    local l = Instance.new("TextLabel", g) l.BackgroundTransparency, l.Position, l.Size, l.Font, l.Text, l.TextColor3, l.TextSize, l.TextXAlignment = 1, UDim2.new(0.05,0,0,0), UDim2.new(0.6,0,0.5,0), "GothamSemibold", txt, Color3.fromRGB(60,60,60), 10, "Left"
+    local v = Instance.new("TextLabel", g) v.BackgroundTransparency, v.Position, v.Size, v.Font, v.Text, v.TextColor3, v.TextSize, v.TextXAlignment = 1, UDim2.new(0.65,0,0,0), UDim2.new(0.3,0,0.5,0), "GothamBold", tostring(sV), Color3.fromRGB(210,0,0), 10, "Right"
+    local sb = Instance.new("TextButton", g) sb.BackgroundColor3, sb.Position, sb.Size, sb.Text = Color3.fromRGB(210,210,210), UDim2.new(0.05,0,0.65,0), UDim2.new(0.9,0,0,6), "" Instance.new("UICorner", sb).CornerRadius = UDim.new(1,0)
+    local sf = Instance.new("Frame", sb) sf.BackgroundColor3, sf.Size = Color3.fromRGB(210,0,0), UDim2.new((sV-1)/499,0,1,0) Instance.new("UICorner", sf).CornerRadius = UDim.new(1,0)
+    return sb, sf, v
+end
+
+local tA, bA = createToggle("Aimbot", UDim2.new(0.05,0,0.02,0))
+local tE, bE = createToggle("Player ESP", UDim2.new(0.05,0,0.14,0))
+local tF, bF = createToggle("Fly Mode", UDim2.new(0.05,0,0.26,0))
+local tS, bS = createToggle("WalkSpeed (วิ่งเร็ว)", UDim2.new(0.05,0,0.38,0))
+local tJ, bJ = createToggle("High Jump (กระโดดสูง)", UDim2.new(0.05,0,0.50,0))
+local tH, bH = createToggle("Big Hitbox (ตัวใหญ่)", UDim2.new(0.05,0,0.62,0))
+local sB, sF, sV = createSlider("Aimbot FOV (1-500)", 300, UDim2.new(0.05,0,0.74,0))
+
+local eA, eE, eF, eS, eJ, eH, fR, flySpd, aS, aJ = false, false, false, false, false, false, 300, 50, 60, 120
+local bG, bV, sld = nil, nil, false
+
+Btn.Activated:Connect(function() F.Visible = not F.Visible end)
+
+local function anim(st, sw, b)
+    TS:Create(sw, TweenInfo.new(0.1), {BackgroundColor3 = st and Color3.fromRGB(210,0,0) or Color3.fromRGB(200,200,200)}):Play()
+    TS:Create(b, TweenInfo.new(0.1), {Position = st and UDim2.new(0,22,0,2) or UDim2.new(0,2,0,2)}):Play()
+end
+
+tA.Activated:Connect(function() eA = not eA anim(eA, tA, bA) end)
+
+local function doEsp(ch, st)
+    local h = ch:FindFirstChild("AkashiESP")
+    if st and not h then h = Instance.new("Highlight", ch) h.Name = "AkashiESP" h.FillColor, h.OutlineColor, h.FillTransparency, h.DepthMode = Color3.fromRGB(210,0,0), Color3.fromRGB(255,255,255), 0.5, Enum.HighlightDepthMode.AlwaysOnTop
+    elseif not st and h then h:Destroy() end
+end
+tE.Activated:Connect(function() eE = not eE anim(eE, tE, bE) if not eE then for _, p in ipairs(P:GetPlayers()) do if p.Character then doEsp(p.Character, false) end end end end)
+
+local function fl()
+    local c = LP.Character local hrp, hum = c and c:FindFirstChild("HumanoidRootPart"), c and c:FindFirstChildOfClass("Humanoid") if not hrp or not hum then return end
+    bG, bV = Instance.new("BodyGyro", hrp), Instance.new("BodyVelocity", hrp) bG.P, bG.maxTorque, bG.cframe = 9e4, Vector3.new(9e9,9e9,9e9), hrp.CFrame bV.velocity, bV.maxForce, hum.PlatformStand = Vector3.new(0,0.1,0), Vector3.new(9e9,9e9,9e9), true
+end
+local function noFl()
+    if bG then bG:Destroy() end if bV then bV:Destroy() end local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid") if hum then hum.PlatformStand = false end
+end
+tF.Activated:Connect(function() eF = not eF anim(eF, tF, bF) if eF then fl() else noFl() end end)
+tS.Activated:Connect(function() eS = not eS anim(eS, tS, bS) end)
+tJ.Activated:Connect(function() eJ = not eJ anim(eJ, tJ, bJ) end)
+
+tH.Activated:Connect(function()
+    eH = not eH anim(eH, tH, bH) if not eH then for _, p in ipairs(P:GetPlayers()) do if p ~= LP and p.Character then local h = p.Character:FindFirstChild("HumanoidRootPart") if h then h.Size, h.Transparency = Vector3.new(2,2,1), 1 end end end end
+end)
+
+local function upSld(input)
+    local p = math.clamp((input.Position.X - sB.AbsolutePosition.X) / sB.AbsoluteSize.X, 0, 1) sF.Size = UDim2.new(p, 0, 1, 0) fR = math.floor(1 + (p * 499)) sV.Text = tostring(fR)
+end
+sB.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then sld = true upSld(i) end end)
+UIS.InputChanged:Connect(function(i) if sld and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then upSld(i) end end)
+UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then sld = false end end)
+
+RS.RenderStepped:Connect(function()
+    local c = LP.Character local hum = c and c:FindFirstChildOfClass("Humanoid")
+    if hum then hum.WalkSpeed = eS and aS or 16 if eJ then if hum.UseJumpPower then hum.JumpPower = aJ else hum.JumpHeight = aJ/2 end else if hum.UseJumpPower then hum.JumpPower = 50 else hum.JumpHeight = 7.2 end end end
+    if eA then
+        local cl, sd = nil, fR
+        for _, player in ipairs(P:GetPlayers()) do
+            if player ~= LP and player.Character and player.Character:FindFirstChild("Head") and player.Character:FindFirstChildOfClass("Humanoid") and player.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
+                local screenPos, onScreen = Camera:WorldToViewportPoint(player.Character.Head.Position)
+                if onScreen then local distance = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)).Magnitude if distance < sd then sd = distance closestTarget = player.Character.Head end end
+            end
+        end
+        if closestTarget then Camera.CFrame = CFrame.new(Camera.CFrame.Position, closestTarget.Position) end
+    end
+    if eE then for _, player in ipairs(P:GetPlayers()) do if player ~= LP and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChildOfClass("Humanoid") and player.Character:FindFirstChildOfClass("Humanoid").Health > 0 then doEsp(player.Character, true) end end end
+    if eH then
+        for _, player in ipairs(P:GetPlayers()) do
+            if player ~= LP and player.Character then local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and player.Character:FindFirstChildOfClass("Humanoid") and player.Character:FindFirstChildOfClass("Humanoid").Health > 0 then hrp.Size, hrp.Transparency, hrp.BrickColor, hrp.CanCollide = Vector3.new(10, 10, 10), 0.7, BrickColor.new("Really red"), false end end
+        end
+    end
+    if eF and bV and bG and c and c:FindFirstChild("HumanoidRootPart") and hum then bG.cframe = Camera.CFrame local md = hum.MoveDirection bV.velocity = md.Magnitude > 0 and Camera.CFrame:VectorToWorldSpace(Vector3.new(md.X, 0, md.Z).Unit * flySpd) or Vector3.new(0, 0.1, 0) end
+end)
+LP.CharacterAdded:Connect(function() if eF then task.wait(1) fl() end end)
