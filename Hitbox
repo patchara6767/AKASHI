@@ -1,0 +1,69 @@
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local ToggleBtn = Instance.new("TextButton")
+local SizeInput = Instance.new("TextBox")
+
+ScreenGui.Parent = game:GetService("CoreGui")
+
+MainFrame.Name = "AkashiMenu"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+MainFrame.BorderColor3 = Color3.fromRGB(200, 0, 0)
+MainFrame.BorderSizePixel = 3
+MainFrame.Position = UDim2.new(0.05, 0, 0.4, 0)
+MainFrame.Size = UDim2.new(0, 200, 0, 180)
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+Title.Name = "Title"
+Title.Parent = MainFrame
+Title.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Font = Enum.Font.SourceSansBold
+Title.Text = "AKASHI"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 24
+
+ToggleBtn.Name = "ToggleBtn"
+ToggleBtn.Parent = MainFrame
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+ToggleBtn.Position = UDim2.new(0.1, 0, 0.3, 0)
+ToggleBtn.Size = UDim2.new(0.8, 0, 0, 35)
+ToggleBtn.Font = Enum.Font.SourceSans
+ToggleBtn.Text = "Status: OFF"
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.TextSize = 18
+
+SizeInput.Name = "SizeInput"
+SizeInput.Parent = MainFrame
+SizeInput.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+SizeInput.Position = UDim2.new(0.1, 0, 0.6, 0)
+SizeInput.Size = UDim2.new(0.8, 0, 0, 35)
+SizeInput.Font = Enum.Font.SourceSans
+SizeInput.Text = "15"
+SizeInput.TextColor3 = Color3.fromRGB(200, 0, 0)
+SizeInput.TextSize = 18
+
+local isEnabled = false
+local inputValue = 15
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    isEnabled = not isEnabled
+    if isEnabled then
+        ToggleBtn.Text = "Status: ON"
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+    else
+        ToggleBtn.Text = "Status: OFF"
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+    end
+end)
+
+SizeInput.FocusLost:Connect(function()
+    local num = tonumber(SizeInput.Text)
+    if num then
+        inputValue = num
+    else
+        SizeInput.Text = tostring(inputValue)
+    end
+end)
