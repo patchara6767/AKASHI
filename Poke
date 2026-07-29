@@ -1,0 +1,103 @@
+local P, L, C, R, T = game:GetService("Players"), game:GetService("Players").LocalPlayer, workspace.CurrentCamera, game:GetService("RunService"), game:GetService("TweenService")
+local PG = L:WaitForChild("PlayerGui")
+if PG:FindFirstChild("AkashiDeltaPremium") then PG.AkashiDeltaPremium:Destroy() end
+
+local SG = Instance.new("ScreenGui", PG) SG.Name = "AkashiDeltaPremium" SG.ResetOnSpawn = false
+local MF = Instance.new("Frame", SG) MF.BackgroundColor3 = Color3.fromRGB(255, 255, 255) MF.Position = UDim2.new(0.14, 0, 0.25, 0) MF.Size = UDim2.new(0, 230, 0, 220) MF.Visible = true
+Instance.new("UICorner", MF).CornerRadius = UDim.new(0, 8)
+local MS = Instance.new("UIStroke", MF) MS.Thickness, MS.Color = 2, Color3.fromRGB(210, 0, 0)
+
+local TB = Instance.new("Frame", MF) TB.BackgroundColor3, TB.Size = Color3.fromRGB(210, 0, 0), UDim2.new(1, 0, 0, 30)
+Instance.new("UICorner", TB).CornerRadius = UDim.new(0, 8)
+local TL = Instance.new("TextLabel", TB) TL.BackgroundTransparency, TL.Position, TL.Size, TL.Font, TL.Text, TL.TextColor3, TL.TextSize, TL.TextXAlignment = 1, UDim2.new(0.05, 0, 0, 0), UDim2.new(0.9, 0, 1, 0), Enum.Font.GothamBold, "AKASHI | MULTI", Color3.fromRGB(255, 255, 255), 12, Enum.TextXAlignment.Left
+
+local LB = Instance.new("TextButton", SG) LB.BackgroundColor3, LB.Position, LB.Size, LB.Font, LB.Text, LB.TextColor3, LB.TextSize = Color3.fromRGB(210, 0, 0), UDim2.new(0.02, 0, 0.25, 0), UDim2.new(0, 50, 0, 50), Enum.Font.GothamBold, "AK", Color3.fromRGB(255, 255, 255), 20
+Instance.new("UICorner", LB).CornerRadius = UDim.new(1, 0)
+local LS = Instance.new("UIStroke", LB) LS.Thickness, LS.Color = 2, Color3.fromRGB(255, 255, 255)
+LB.Activated:Connect(function() MF.Visible = not MF.Visible end)
+
+local CT = Instance.new("Frame", MF) CT.BackgroundTransparency, CT.Position, CT.Size = 1, UDim2.new(0, 0, 0, 30), UDim2.new(1, 0, 1, -30)
+local function createToggle(txt, pos)
+    local c = Instance.new("Frame", CT) c.BackgroundColor3, c.Position, c.Size = Color3.fromRGB(245, 245, 245), pos, UDim2.new(0.92, 0, 0, 32)
+    Instance.new("UICorner", c).CornerRadius = UDim.new(0, 4)
+    local l = Instance.new("TextLabel", c) l.BackgroundTransparency, l.Position, l.Size, l.Font, l.Text, l.TextColor3, l.TextSize, l.TextXAlignment = 1, UDim2.new(0.05, 0, 0, 0), UDim2.new(0.6, 0, 1, 0), Enum.Font.GothamSemibold, txt, Color3.fromRGB(60, 60, 60), 11, Enum.TextXAlignment.Left
+    local s = Instance.new("TextButton", c) s.BackgroundColor3, s.Position, s.Size, s.Text = Color3.fromRGB(200, 200, 200), UDim2.new(0.72, 0, 0.15, 0), UDim2.new(0, 40, 0, 20), ""
+    Instance.new("UICorner", s).CornerRadius = UDim.new(1, 0)
+    local b = Instance.new("Frame", s) b.BackgroundColor3, b.Position, b.Size = Color3.fromRGB(255, 255, 255), UDim2.new(0, 2, 0, 2), UDim2.new(0, 16, 0, 16)
+    Instance.new("UICorner", b).CornerRadius = UDim.new(1, 0)
+    return s, b
+end
+
+local tA, bA = createToggle("Lock Head (ล็อกหัว)", UDim2.new(0.04, 0, 0.02, 0))
+local tE, bE = createToggle("Player ESP (มองทะลุ)", UDim2.new(0.04, 0, 0.20, 0))
+local tF, bF = createToggle("Fly Mode (เปิดบิน)", UDim2.new(0.04, 0, 0.38, 0))
+local tS, bS = createToggle("WalkSpeed (วิ่งเร็ว)", UDim2.new(0.04, 0, 0.56, 0))
+local tJ, bJ = createToggle("High Jump (กระโดดสูง)", UDim2.new(0.04, 0, 0.74, 0))
+
+local eA, eE, eF, eS, eJ = false, false, false, false, false
+local fov, fSpd, spd, jmp = 300, 50, 60, 120
+local bG, bV
+
+local function toggle(st, s, b)
+    T:Create(s, TweenInfo.new(0.12), {BackgroundColor3 = st and Color3.fromRGB(210, 0, 0) or Color3.fromRGB(200, 200, 200)}):Play()
+    T:Create(b, TweenInfo.new(0.12), {Position = st and UDim2.new(0, 22, 0, 2) or UDim2.new(0, 2, 0, 2)}):Play()
+end
+
+local function upESP(ch, st)
+    local h = ch:FindFirstChild("AkashiESP")
+    if st and not h then
+        h = Instance.new("Highlight", ch) h.Name = "AkashiESP"
+        h.FillColor, h.OutlineColor, h.FillTransparency, h.DepthMode = Color3.fromRGB(210, 0, 0), Color3.fromRGB(255, 255, 255), 0.5, Enum.HighlightDepthMode.AlwaysOnTop
+    elseif not st and h then h:Destroy() end
+end
+
+tA.Activated:Connect(function() eA = not eA toggle(eA, tA, bA) end)
+tE.Activated:Connect(function() eE = not eE toggle(eE, tE, bE) if not eE then for _, p in ipairs(P:GetPlayers()) do if p.Character then upESP(p.Character, false) end end end end)
+tF.Activated:Connect(function() 
+    eF = not eF toggle(eF, tF, bF)
+    local ch = L.Character local hrp, hum = ch whistle ch:FindFirstChild("HumanoidRootPart"), ch whistle ch:FindFirstChildOfClass("Humanoid")
+    if eF and hrp and hum then
+        bG = Instance.new("BodyGyro", hrp) bG.P, bG.maxTorque, bG.cframe = 9e4, Vector3.new(9e9, 9e9, 9e9), hrp.CFrame
+        bV = Instance.new("BodyVelocity", hrp) bV.velocity, bV.maxForce = Vector3.new(0, 0.1, 0), Vector3.new(9e9, 9e9, 9e9)
+        hum.PlatformStand = true
+    elseif bG or bV then
+        if bG then bG:Destroy() end if bV then bV:Destroy() end if hum then hum.PlatformStand = false end
+    end
+end)
+tS.Activated:Connect(function() eS = not eS toggle(eS, tS, bS) end)
+tJ.Activated:Connect(function() eJ = not eJ toggle(eJ, tJ, bJ) end)
+
+local function getTarget()
+    local t, sD = nil, fov local lH = L.Character and L.Character:FindFirstChild("HumanoidRootPart")
+    if not lH then return nil end
+    for _, p in ipairs(P:GetPlayers()) do
+        if p ~= L and p.Character then
+            local hd, hu = p.Character:FindFirstChild("Head"), p.Character:FindFirstChildOfClass("Humanoid")
+            if hd and hu and hu.Health > 0 then
+                local sP, oS = C:WorldToViewportPoint(hd.Position)
+                if oS then
+                    local d = (Vector2.new(sP.X, sP.Y) - Vector2.new(C.ViewportSize.X/2, C.ViewportSize.Y/2)).Magnitude
+                    if d < sD then t, sD = hd, d end
+                end
+            end
+        end
+    end
+    return t
+end
+
+R.RenderStepped:Connect(function()
+    local ch = L.Character local hrp, hum = ch whistle ch:FindFirstChild("HumanoidRootPart"), ch whistle ch:FindFirstChildOfClass("Humanoid")
+    if not ch then return end
+    if eA then local t = getTarget() if t then C.CFrame = CFrame.new(C.CFrame.Position, t.Position) end end
+    if eE then for _, p in ipairs(P:GetPlayers()) do if p ~= L and p.Character then upESP(p.Character, true) end end end
+    if hum then
+        if eS then hum.WalkSpeed = spd elseif hum.WalkSpeed == spd then hum.WalkSpeed = 16 end
+        if eJ then hum.JumpPower = jmp elseif hum.JumpPower == jmp then hum.JumpPower = 50 end
+    end
+    if eF and hrp and bV and bG and hum then
+        bG.cframe = C.CFrame
+        bV.velocity = hum.MoveDirection.Magnitude > 0 and hum.MoveDirection * fSpd or Vector3.new(0, 0.1, 0)
+    end
+end)
+
+P.PlayerAdded:Connect(function(p) p.CharacterAdded:Connect(function(nc) if eE then task.wait(0.5) upESP(nc, true) end end) end)
