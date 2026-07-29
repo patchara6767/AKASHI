@@ -1,0 +1,243 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+local ParentGui = LocalPlayer:WaitForChild("PlayerGui")
+if ParentGui:FindFirstChild("AkashiDeltaPremium") then ParentGui.AkashiDeltaPremium:Destroy() end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "AkashiDeltaPremium"
+ScreenGui.Parent = ParentGui
+ScreenGui.ResetOnSpawn = false
+
+local LogoButton = Instance.new("TextButton")
+LogoButton.Parent = ScreenGui
+LogoButton.BackgroundColor3 = Color3.fromRGB(210, 0, 0)
+LogoButton.Position = UDim2.new(0.02, 0, 0.25, 0)
+LogoButton.Size = UDim2.new(0, 50, 0, 50)
+LogoButton.Font = Enum.Font.GothamBold
+LogoButton.Text = "AK"
+LogoButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+LogoButton.TextSize = 20
+
+local LogoCorner = Instance.new("UICorner")
+LogoCorner.CornerRadius = UDim.new(1, 0)
+LogoCorner.Parent = LogoButton
+
+local LogoStroke = Instance.new("UIStroke")
+LogoStroke.Thickness = 2
+LogoStroke.Color = Color3.fromRGB(255, 255, 255)
+LogoStroke.Parent = LogoButton
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+MainFrame.Position = UDim2.new(0.14, 0, 0.25, 0)
+MainFrame.Size = UDim2.new(0, 230, 0, 285)
+MainFrame.Visible = true
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 8)
+MainCorner.Parent = MainFrame
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Thickness = 2
+MainStroke.Color = Color3.fromRGB(210, 0, 0)
+MainStroke.Parent = MainFrame
+
+local TopBar = Instance.new("Frame")
+TopBar.Parent = MainFrame
+TopBar.BackgroundColor3 = Color3.fromRGB(210, 0, 0)
+TopBar.Size = UDim2.new(1, 0, 0, 30)
+
+local TopCorner = Instance.new("UICorner")
+TopCorner.CornerRadius = UDim.new(0, 8)
+TopCorner.Parent = TopBar
+
+local Title = Instance.new("TextLabel")
+Title.Parent = TopBar
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0.05, 0, 0, 0)
+Title.Size = UDim2.new(0.9, 0, 1, 0)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "AKASHI | MULTI"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 12
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+local Content = Instance.new("Frame")
+Content.Parent = MainFrame
+Content.BackgroundTransparency = 1
+Content.Position = UDim2.new(0, 0, 0, 30)
+Content.Size = UDim2.new(1, 0, 1, -30)
+
+local function createToggle(text, pos)
+    local container = Instance.new("Frame")
+    container.Parent = Content
+    container.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
+    container.Position = pos
+    container.Size = UDim2.new(0.92, 0, 0, 32)
+    
+    local cr = Instance.new("UICorner")
+    cr.CornerRadius = UDim.new(0, 4)
+    cr.Parent = container
+
+    local label = Instance.new("TextLabel")
+    label.Parent = container
+    label.BackgroundTransparency = 1
+    label.Position = UDim2.new(0.05, 0, 0, 0)
+    label.Size = UDim2.new(0.6, 0, 1, 0)
+    label.Font = Enum.Font.GothamSemibold
+    label.Text = text
+    label.TextColor3 = Color3.fromRGB(60, 60, 60)
+    label.TextSize = 11
+    label.TextXAlignment = Enum.TextXAlignment.Left
+
+    local switch = Instance.new("TextButton")
+    switch.Parent = container
+    switch.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+    switch.Position = UDim2.new(0.72, 0, 0.15, 0)
+    switch.Size = UDim2.new(0, 40, 0, 20)
+    switch.Text = ""
+    
+    local scr = Instance.new("UICorner")
+    scr.CornerRadius = UDim.new(1, 0)
+    scr.Parent = switch
+
+    local ball = Instance.new("Frame")
+    ball.Parent = switch
+    ball.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    ball.Position = UDim2.new(0, 2, 0, 2)
+    ball.Size = UDim2.new(0, 16, 0, 16)
+    
+    local bcr = Instance.new("UICorner")
+    bcr.CornerRadius = UDim.new(1, 0)
+    bcr.Parent = ball
+
+    return switch, ball
+end
+
+local AimToggle, AimBall = createToggle("Lock Head (ล็อกหัว)", UDim2.new(0.04, 0, 0.02, 0))
+local EspToggle, EspBall = createToggle("Player ESP (มองทะลุ)", UDim2.new(0.04, 0, 0.18, 0))
+local FlyToggle, FlyBall = createToggle("Fly Mode (เปิดบิน)", UDim2.new(0.04, 0, 0.34, 0))
+local SpeedToggle, SpeedBall = createToggle("WalkSpeed (วิ่งเร็ว)", UDim2.new(0.04, 0, 0.50, 0))
+local JumpToggle, JumpBall = createToggle("High Jump (กระโดดสูง)", UDim2.new(0.04, 0, 0.66, 0))
+local HitboxToggle, HitboxBall = createToggle("Big Hitbox (ตัวใหญ่)", UDim2.new(0.04, 0, 0.82, 0))
+
+local aimEnabled, espEnabled, flyEnabled, speedEnabled, jumpEnabled, hitboxEnabled = false, false, false, false, false, false
+local fovRadius, flySpeed, activeSpeed, activeJump = 300, 50, 60, 120
+local bodyGyro, bodyVelocity
+
+LogoButton.Activated:Connect(function() 
+    MainFrame.Visible = not MainFrame.Visible 
+end)
+
+local function handleToggle(state, switch, ball)
+    local targetColor = state and Color3.fromRGB(210, 0, 0) or Color3.fromRGB(200, 200, 200)
+    local targetPos = state and UDim2.new(0, 22, 0, 2) or UDim2.new(0, 2, 0, 2)
+    TweenService:Create(switch, TweenInfo.new(0.12), {BackgroundColor3 = targetColor}):Play()
+    TweenService:Create(ball, TweenInfo.new(0.12), {Position = targetPos}):Play()
+end
+
+AimToggle.Activated:Connect(function() aimEnabled = not aimEnabled handleToggle(aimEnabled, AimToggle, AimBall) end)
+
+local function applyEspEffect(char, state)
+    local highlight = char:FindFirstChild("AkashiESP")
+    if state then
+        if not highlight then
+            highlight = Instance.new("Highlight")
+            highlight.Name = "AkashiESP"
+            highlight.FillColor, highlight.OutlineColor = Color3.fromRGB(210, 0, 0), Color3.fromRGB(255, 255, 255)
+            highlight.FillTransparency, highlight.DepthMode = 0.5, Enum.HighlightDepthMode.AlwaysOnTop
+            highlight.Parent = char
+        end
+    else
+        if highlight then highlight:Destroy() end
+    end
+end
+
+EspToggle.Activated:Connect(function()
+    espEnabled = not espEnabled
+    handleToggle(espEnabled, EspToggle, EspBall)
+    if not espEnabled then
+        for _, p in ipairs(Players:GetPlayers()) do if p.Character then applyEspEffect(p.Character, false) end end
+    end
+end)
+
+local function startFly()
+    local char = LocalPlayer.Character
+    local hrp, humanoid = char and char:FindFirstChild("HumanoidRootPart"), char and char:FindFirstChildOfClass("Humanoid")
+    if not hrp or not humanoid then return end
+    bodyGyro = Instance.new("BodyGyro") bodyGyro.P = 9e4 bodyGyro.maxTorque = Vector3.new(9e9, 9e9, 9e9) bodyGyro.cframe = hrp.CFrame bodyGyro.Parent = hrp
+    bodyVelocity = Instance.new("BodyVelocity") bodyVelocity.velocity = Vector3.new(0, 0.1, 0) bodyVelocity.maxForce = Vector3.new(9e9, 9e9, 9e9) bodyVelocity.Parent = hrp
+    humanoid.PlatformStand = true
+end
+
+local function stopFly()
+    if bodyGyro then bodyGyro:Destroy() end if bodyVelocity then bodyVelocity:Destroy() end
+    local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    if humanoid then humanoid.PlatformStand = false end
+end
+
+FlyToggle.Activated:Connect(function() flyEnabled = not flyEnabled handleToggle(flyEnabled, FlyToggle, FlyBall) if flyEnabled then startFly() else stopFly() end end)
+SpeedToggle.Activated:Connect(function() speedEnabled = not speedEnabled handleToggle(speedEnabled, SpeedToggle, SpeedBall) end)
+JumpToggle.Activated:Connect(function() jumpEnabled = not jumpEnabled handleToggle(jumpEnabled, JumpToggle, JumpBall) end)
+
+HitboxToggle.Activated:Connect(function()
+    hitboxEnabled = not hitboxEnabled
+    handleToggle(hitboxEnabled, HitboxToggle, HitboxBall)
+    if not hitboxEnabled then
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character then
+                local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    hrp.Size = Vector3.new(2, 2, 1)
+                    hrp.Transparency = 1
+                end
+            end
+        end
+    end
+end)
+
+local function getClosestPlayer()
+    local closestTarget, shortestDistance = nil, fovRadius
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") and player.Character:FindFirstChildOfClass("Humanoid") and player.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
+            local screenPos, onScreen = Camera:WorldToViewportPoint(player.Character.Head.Position)
+            if onScreen then
+                local distance = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)).Magnitude
+                if distance < shortestDistance then shortestDistance = distance closestTarget = player.Character.Head end
+            end
+        end
+    end
+    return closestTarget
+end
+
+RunService.RenderStepped:Connect(function()
+    local char = LocalPlayer.Character
+    local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+    
+    if humanoid then
+        if speedEnabled then humanoid.WalkSpeed = activeSpeed else humanoid.WalkSpeed = 16 end
+        if jumpEnabled then
+            if humanoid.UseJumpPower then humanoid.JumpPower = activeJump else humanoid.JumpHeight = activeJump / 2 end
+        else
+            if humanoid.UseJumpPower then humanoid.JumpPower = 50 else humanoid.JumpHeight = 7.2 end
+        end
+    end
+
+    if aimEnabled then
+        local target = getClosestPlayer()
+        if target then Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position) end
+    end
+    
+    if espEnabled then
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChildOfClass("Humanoid") and player.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
+                applyEspEffect(player.Character, true)
+            end
+        end
+    end
+
