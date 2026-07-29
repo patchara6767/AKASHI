@@ -1,0 +1,251 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+local ParentGui = LocalPlayer:WaitForChild("PlayerGui")
+if ParentGui:FindFirstChild("AkashiFixedHub") then ParentGui.AkashiFixedHub:Destroy() end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "AkashiFixedHub"
+ScreenGui.Parent = ParentGui
+ScreenGui.ResetOnSpawn = false
+
+-- ปุ่มเปิด/ปิดเมนูทรงกลมสีแดง
+local LogoButton = Instance.new("TextButton")
+LogoButton.Parent = ScreenGui
+LogoButton.BackgroundColor3 = Color3.fromRGB(210, 0, 0)
+LogoButton.Position = UDim2.new(0.02, 0, 0.25, 0)
+LogoButton.Size = UDim2.new(0, 45, 0, 45)
+LogoButton.Font = Enum.Font.GothamBold
+LogoButton.Text = "AK"
+LogoButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+LogoButton.TextSize = 18
+
+local LogoCorner = Instance.new("UICorner")
+LogoCorner.CornerRadius = UDim.new(1, 0)
+LogoCorner.Parent = LogoButton
+
+-- หน้าต่างเมนูหลัก (ขยายความสูงเพิ่มเป็น 325 เพื่อให้พอดีกับแถบสไลเดอร์ FOV อันใหม่)
+local MainFrame = Instance.new("Frame")
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+MainFrame.Position = UDim2.new(0.12, 0, 0.25, 0)
+MainFrame.Size = UDim2.new(0, 220, 0, 325)
+MainFrame.Visible = true
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 8)
+MainCorner.Parent = MainFrame
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Thickness = 2
+MainStroke.Color = Color3.fromRGB(210, 0, 0)
+MainStroke.Parent = MainFrame
+
+local TopBar = Instance.new("Frame")
+TopBar.Parent = MainFrame
+TopBar.BackgroundColor3 = Color3.fromRGB(210, 0, 0)
+TopBar.Size = UDim2.new(1, 0, 0, 30)
+
+local TopCorner = Instance.new("UICorner")
+TopCorner.CornerRadius = UDim.new(0, 8)
+TopCorner.Parent = TopBar
+
+local Title = Instance.new("TextLabel")
+Title.Parent = TopBar
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0.05, 0, 0, 0)
+Title.Size = UDim2.new(0.9, 0, 1, 0)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "AKASHI | MINI"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 12
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+local Content = Instance.new("Frame")
+Content.Parent = MainFrame
+Content.BackgroundTransparency = 1
+Content.Position = UDim2.new(0, 0, 0, 30)
+Content.Size = UDim2.new(1, 0, 1, -30)
+
+local function createToggle(text, pos)
+    local container = Instance.new("Frame")
+    container.Parent = Content
+    container.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
+    container.Position = pos
+    container.Size = UDim2.new(0.9, 0, 0, 32)
+    
+    local cr = Instance.new("UICorner")
+    cr.CornerRadius = UDim.new(0, 4)
+    cr.Parent = container
+
+    local label = Instance.new("TextLabel")
+    label.Parent = container
+    label.BackgroundTransparency = 1
+    label.Position = UDim2.new(0.05, 0, 0, 0)
+    label.Size = UDim2.new(0.6, 0, 1, 0)
+    label.Font = Enum.Font.GothamSemibold
+    label.Text = text
+    label.TextColor3 = Color3.fromRGB(60, 60, 60)
+    label.TextSize = 11
+    label.TextXAlignment = Enum.TextXAlignment.Left
+
+    local switch = Instance.new("TextButton")
+    switch.Parent = container
+    switch.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+    switch.Position = UDim2.new(0.72, 0, 0.15, 0)
+    switch.Size = UDim2.new(0, 40, 0, 20)
+    switch.Text = ""
+    
+    local scr = Instance.new("UICorner")
+    scr.CornerRadius = UDim.new(1, 0)
+    scr.Parent = switch
+
+    local ball = Instance.new("Frame")
+    ball.Parent = switch
+    ball.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    ball.Position = UDim2.new(0, 2, 0, 2)
+    ball.Size = UDim2.new(0, 16, 0, 16)
+    
+    local bcr = Instance.new("UICorner")
+    bcr.CornerRadius = UDim.new(1, 0)
+    bcr.Parent = ball
+
+    return switch, ball
+end
+
+-- ฟังก์ชันสร้างสไลเดอร์สำหรับปรับระยะ FOV ล็อกหัว
+local function createSlider(text, startVal, pos)
+    local container = Instance.new("Frame")
+    container.Parent = Content
+    container.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
+    container.Position = pos
+    container.Size = UDim2.new(0.9, 0, 0, 38)
+    
+    local cr = Instance.new("UICorner")
+    cr.CornerRadius = UDim.new(0, 4)
+    cr.Parent = container
+
+    local label = Instance.new("TextLabel")
+    label.Parent = container
+    label.BackgroundTransparency = 1
+    label.Position = UDim2.new(0.05, 0, 0, 0)
+    label.Size = UDim2.new(0.6, 0, 0.5, 0)
+    label.Font = Enum.Font.GothamSemibold
+    label.Text = text
+    label.TextColor3 = Color3.fromRGB(60, 60, 60)
+    label.TextSize = 10
+    label.TextXAlignment = Enum.TextXAlignment.Left
+
+    local valueLabel = Instance.new("TextLabel")
+    valueLabel.Parent = container
+    valueLabel.BackgroundTransparency = 1
+    valueLabel.Position = UDim2.new(0.65, 0, 0, 0)
+    valueLabel.Size = UDim2.new(0.3, 0, 0.5, 0)
+    valueLabel.Font = Enum.Font.GothamBold
+    valueLabel.Text = tostring(startVal)
+    valueLabel.TextColor3 = Color3.fromRGB(210, 0, 0)
+    valueLabel.TextSize = 10
+    valueLabel.TextXAlignment = Enum.TextXAlignment.Right
+
+    local sliderBar = Instance.new("TextButton")
+    sliderBar.Parent = container
+    sliderBar.BackgroundColor3 = Color3.fromRGB(210, 210, 210)
+    sliderBar.Position = UDim2.new(0.05, 0, 0.65, 0)
+    sliderBar.Size = UDim2.new(0.9, 0, 0, 6)
+    sliderBar.Text = ""
+    
+    local sbCr = Instance.new("UICorner")
+    sbCr.CornerRadius = UDim.new(1, 0)
+    sbCr.Parent = sliderBar
+
+    local sliderFill = Instance.new("Frame")
+    sliderFill.Parent = sliderBar
+    sliderFill.BackgroundColor3 = Color3.fromRGB(210, 0, 0)
+    
+    -- คำนวณขนาดเริ่มต้นของแถบสีแดงตามค่าคอนฟิก
+    local initPercent = (startVal - 1) / 499
+    sliderFill.Size = UDim2.new(initPercent, 0, 1, 0)
+    
+    local sfCr = Instance.new("UICorner")
+    sfCr.CornerRadius = UDim.new(1, 0)
+    sfCr.Parent = sliderFill
+
+    return sliderBar, sliderFill, valueLabel
+end
+
+local AimToggle, AimBall = createToggle("Aimbot", UDim2.new(0.05, 0, 0.02, 0))
+local EspToggle, EspBall = createToggle("Player ESP", UDim2.new(0.05, 0, 0.14, 0))
+local FlyToggle, FlyBall = createToggle("Fly Mode", UDim2.new(0.05, 0, 0.26, 0))
+local SpeedToggle, SpeedBall = createToggle("WalkSpeed (วิ่งเร็ว)", UDim2.new(0.05, 0, 0.38, 0))
+local JumpToggle, JumpBall = createToggle("High Jump (กระโดดสูง)", UDim2.new(0.05, 0, 0.50, 0))
+local HitboxToggle, HitboxBall = createToggle("Big Hitbox (ตัวใหญ่)", UDim2.new(0.05, 0, 0.62, 0))
+local FovSlider, FovFill, FovValue = createSlider("Aimbot FOV (1-500)", 300, UDim2.new(0.05, 0, 0.74, 0))
+
+local aimEnabled, espEnabled, flyEnabled, speedEnabled, jumpEnabled, hitboxEnabled = false, false, false, false, false, false
+local fovRadius, flySpeed, activeSpeed, activeJump = 300, 50, 60, 120
+local bodyGyro, bodyVelocity
+
+LogoButton.Activated:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
+
+local function handleToggle(state, switch, ball)
+    local targetColor = state and Color3.fromRGB(210, 0, 0) or Color3.fromRGB(200, 200, 200)
+    local targetPos = state and UDim2.new(0, 22, 0, 2) or UDim2.new(0, 2, 0, 2)
+    TweenService:Create(switch, TweenInfo.new(0.1), {BackgroundColor3 = targetColor}):Play()
+    TweenService:Create(ball, TweenInfo.new(0.1), {Position = targetPos}):Play()
+end
+
+AimToggle.Activated:Connect(function() aimEnabled = not aimEnabled handleToggle(aimEnabled, AimToggle, AimBall) end)
+
+local function applyEspEffect(char, state)
+    local highlight = char:FindFirstChild("AkashiESP")
+    if state then
+        if not highlight then
+            highlight = Instance.new("Highlight")
+            highlight.Name = "AkashiESP"
+            highlight.FillColor, highlight.OutlineColor = Color3.fromRGB(210, 0, 0), Color3.fromRGB(255, 255, 255)
+            highlight.FillTransparency, highlight.OutlineTransparency = 0.5, 0
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            highlight.Parent = char
+        end
+    else
+        if highlight then highlight:Destroy() end
+    end
+end
+
+EspToggle.Activated:Connect(function()
+    espEnabled = not espEnabled
+    handleToggle(espEnabled, EspToggle, EspBall)
+    if not espEnabled then
+        for _, p in ipairs(Players:GetPlayers()) do if p.Character then applyEspEffect(p.Character, false) end end
+    end
+end)
+
+local function startFly()
+    local char = LocalPlayer.Character
+    local hrp, humanoid = char and char:FindFirstChild("HumanoidRootPart"), char and char:FindFirstChildOfClass("Humanoid")
+    if not hrp or not humanoid then return end
+    bodyGyro = Instance.new("BodyGyro") bodyGyro.P = 9e4 bodyGyro.maxTorque = Vector3.new(9e9, 9e9, 9e9) bodyGyro.cframe = hrp.CFrame bodyGyro.Parent = hrp
+    bodyVelocity = Instance.new("BodyVelocity") bodyVelocity.velocity = Vector3.new(0, 0.1, 0) bodyVelocity.maxForce = Vector3.new(9e9, 9e9, 9e9) bodyVelocity.Parent = hrp
+    humanoid.PlatformStand = true
+end
+
+local function stopFly()
+    if bodyGyro then bodyGyro:Destroy() end if bodyVelocity then bodyVelocity:Destroy() end
+    local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    if humanoid then humanoid.PlatformStand = false end
+end
+
+FlyToggle.Activated:Connect(function() flyEnabled = not flyEnabled handleToggle(flyEnabled, FlyToggle, FlyBall) if flyEnabled then startFly() else stopFly() end end)
+SpeedToggle.Activated:Connect(function() speedEnabled = not speedEnabled handleToggle(speedEnabled, SpeedToggle, SpeedBall) end)
+JumpToggle.Activated:Connect(function() jumpEnabled = not jumpEnabled handleToggle(jumpEnabled, JumpToggle, JumpBall) end)
+
+HitboxToggle.Activated:Connect(function()
+    hitboxEnabled = not hitboxEnabled
+    handleToggle(hitboxEnabled, HitboxToggle, HitboxBall)
+    if not hitboxEnabled then
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character then
