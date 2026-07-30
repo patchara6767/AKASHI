@@ -1,0 +1,261 @@
+local P = game:GetService("Players")
+local L = P.LocalPlayer
+local T = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
+local RS = game:GetService("ReplicatedStorage")
+local C = workspace.CurrentCamera
+
+local PG = L:WaitForChild("PlayerGui")
+if PG:FindFirstChild("AkashiHubPremium") then 
+    PG.AkashiHubPremium:Destroy() 
+end
+
+local SG = Instance.new("ScreenGui")
+SG.Name = "AkashiHubPremium"
+SG.ResetOnSpawn = false
+SG.Parent = PG
+
+local OpenBtn = Instance.new("TextButton")
+OpenBtn.Name = "OpenButton"
+OpenBtn.Size = UDim2.new(0, 55, 0, 55)
+OpenBtn.Position = UDim2.new(0.02, 0, 0.25, 0)
+OpenBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+OpenBtn.Font = Enum.Font.GothamBold
+OpenBtn.Text = "AK"
+OpenBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+OpenBtn.TextSize = 22
+OpenBtn.Visible = false
+OpenBtn.Parent = SG
+
+local OBCorner = Instance.new("UICorner")
+OBCorner.CornerRadius = UDim.new(1, 0)
+OBCorner.Parent = OpenBtn
+
+local OBStroke = Instance.new("UIStroke")
+OBStroke.Thickness = 2
+OBStroke.Color = Color3.fromRGB(255, 255, 255)
+OBStroke.Parent = OpenBtn
+
+local MF = Instance.new("Frame")
+MF.Name = "MainFrame"
+MF.Size = UDim2.new(0, 440, 0, 260)
+MF.Position = UDim2.new(0.35, 0, 0.3, 0)
+MF.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+MF.Visible = true
+MF.Parent = SG
+
+local MFCorner = Instance.new("UICorner")
+MFCorner.CornerRadius = UDim.new(0, 8)
+MFCorner.Parent = MF
+
+local MFStroke = Instance.new("UIStroke")
+MFStroke.Thickness = 1.5
+MFStroke.Color = Color3.fromRGB(170, 0, 0)
+MFStroke.Parent = MF
+
+local TB = Instance.new("Frame")
+TB.Size = UDim2.new(1, 0, 0, 38)
+TB.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+TB.Parent = MF
+
+local TBCorner = Instance.new("UICorner")
+TBCorner.CornerRadius = UDim.new(0, 8)
+TBCorner.Parent = TB
+
+local TB_Patch = Instance.new("Frame")
+TB_Patch.Size = UDim2.new(1, 0, 0, 10)
+TB_Patch.Position = UDim2.new(0, 0, 1, -10)
+TB_Patch.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+TB_Patch.BorderSizePixel = 0
+TB_Patch.Parent = TB
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(0.6, 0, 1, 0)
+Title.Position = UDim2.new(0.04, 0, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBold
+Title.Text = "🔴 AKASHI HUB | PREMIUM"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 13
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = TB
+
+local ClBtn = Instance.new("TextButton")
+ClBtn.Size = UDim2.new(0, 50, 1, 0)
+ClBtn.Position = UDim2.new(1, -50, 0, 0)
+ClBtn.BackgroundTransparency = 1
+ClBtn.Font = Enum.Font.GothamBold
+ClBtn.Text = "✕"
+ClBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ClBtn.TextSize = 16
+ClBtn.Parent = TB
+
+local Sidebar = Instance.new("Frame")
+Sidebar.Size = UDim2.new(0, 110, 1, -38)
+Sidebar.Position = UDim2.new(0, 0, 0, 38)
+Sidebar.BackgroundColor3 = Color3.fromRGB(14, 14, 14)
+Sidebar.BorderSizePixel = 0
+Sidebar.Parent = MF
+
+local SBCorner = Instance.new("UICorner")
+SBCorner.CornerRadius = UDim.new(0, 8)
+SBCorner.Parent = Sidebar
+
+local SB_Patch = Instance.new("Frame")
+SB_Patch.Size = UDim2.new(0, 10, 1, 0)
+SB_Patch.Position = UDim2.new(1, -10, 0, 0)
+SB_Patch.BackgroundColor3 = Color3.fromRGB(14, 14, 14)
+SB_Patch.BorderSizePixel = 0
+SB_Patch.Parent = Sidebar
+
+local Tab1Btn = Instance.new("TextButton")
+Tab1Btn.Size = UDim2.new(0.9, 0, 0, 30)
+Tab1Btn.Position = UDim2.new(0.05, 0, 0, 12)
+Tab1Btn.BackgroundColor3 = Color3.fromRGB(210, 0, 0)
+Tab1Btn.Font = Enum.Font.GothamBold
+Tab1Btn.Text = "▸ Main"
+Tab1Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+Tab1Btn.TextSize = 11
+Tab1Btn.Parent = Sidebar
+local T1C = Instance.new("UICorner") T1C.CornerRadius = UDim.new(0, 4) T1C.Parent = Tab1Btn
+
+local Tab2Btn = Instance.new("TextButton")
+Tab2Btn.Size = UDim2.new(0.9, 0, 0, 30)
+Tab2Btn.Position = UDim2.new(0.05, 0, 0, 47)
+Tab2Btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Tab2Btn.Font = Enum.Font.GothamMedium
+Tab2Btn.Text = "▸ Player"
+Tab2Btn.TextColor3 = Color3.fromRGB(160, 160, 160)
+Tab2Btn.TextSize = 11
+Tab2Btn.Parent = Sidebar
+local T2C = Instance.new("UICorner") T2C.CornerRadius = UDim.new(0, 4) T2C.Parent = Tab2Btn
+
+local ContentMain = Instance.new("ScrollingFrame")
+ContentMain.Size = UDim2.new(1, -120, 1, -50)
+ContentMain.Position = UDim2.new(0, 115, 0, 45)
+ContentMain.BackgroundTransparency = 1
+ContentMain.CanvasSize = UDim2.new(0, 0, 0, 250)
+ContentMain.ScrollBarThickness = 0
+ContentMain.Visible = true
+ContentMain.Parent = MF
+
+local ContentPlayer = Instance.new("ScrollingFrame")
+ContentPlayer.Size = UDim2.new(1, -120, 1, -50)
+ContentPlayer.Position = UDim2.new(0, 115, 0, 45)
+ContentPlayer.BackgroundTransparency = 1
+ContentPlayer.CanvasSize = UDim2.new(0, 0, 0, 250)
+ContentPlayer.ScrollBarThickness = 0
+ContentPlayer.Visible = false
+ContentPlayer.Parent = MF
+
+local function createToggle(parent, text, yPos)
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(0.96, 0, 0, 35)
+    container.Position = UDim2.new(0, 0, 0, yPos)
+    container.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+    container.Parent = parent
+    local CC = Instance.new("UICorner") CC.CornerRadius = UDim.new(0, 4) CC.Parent = container
+    local CS = Instance.new("UIStroke") CS.Color = Color3.fromRGB(35, 35, 35) CS.Parent = container
+
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(0.6, 0, 1, 0)
+    lbl.Position = UDim2.new(0.04, 0, 0, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.Font = Enum.Font.GothamMedium
+    lbl.Text = text
+    lbl.TextColor3 = Color3.fromRGB(220, 220, 220)
+    lbl.TextSize = 11
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Parent = container
+
+    local sw = Instance.new("TextButton")
+    sw.Size = UDim2.new(0, 40, 0, 20)
+    sw.Position = UDim2.new(0.84, 0, 0.22, 0)
+    sw.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    sw.Text = ""
+    sw.Parent = container
+    local SC = Instance.new("UICorner") SC.CornerRadius = UDim.new(1, 0) SC.Parent = sw
+
+    local ball = Instance.new("Frame")
+    ball.Size = UDim2.new(0, 16, 0, 16)
+    ball.Position = UDim2.new(0, 2, 0, 2)
+    ball.BackgroundColor3 = Color3.fromRGB(140, 140, 140)
+    ball.Parent = sw
+    local BC = Instance.new("UICorner") BC.CornerRadius = UDim.new(1, 0) BC.Parent = ball
+
+    return sw, ball
+end
+
+local function createActionBtn(parent, text, yPos)
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(0.96, 0, 0, 35)
+    container.Position = UDim2.new(0, 0, 0, yPos)
+    container.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+    container.Parent = parent
+    local CC = Instance.new("UICorner") CC.CornerRadius = UDim.new(0, 4) CC.Parent = container
+    local stroke = Instance.new("UIStroke") stroke.Color = Color3.fromRGB(35, 35, 35) stroke.Parent = container
+
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 1, 0)
+    btn.BackgroundTransparency = 1
+    btn.Font = Enum.Font.GothamBold
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(210, 0, 0)
+    btn.TextSize = 11
+    btn.Parent = container
+
+    return btn
+end
+
+local tC, bC = createToggle(ContentMain, "Auto Claim [รับรางวัลอัตโนมัติ]", 0)
+local tB, bB = createToggle(ContentMain, "Auto Buy Rug [ซื้อพรมอัตโนมัติ]", 40)
+local btnT = createActionBtn(ContentMain, "Execute Throw Green [พลิกขวดโซนเขียว]", 80)
+
+local tA, bA = createToggle(ContentPlayer, "Lock Head [ระบบล็อกหัว]", 0)
+local tE, bE = createToggle(ContentPlayer, "Player ESP [มองทะลุ]", 40)
+local tF, bF = createToggle(ContentPlayer, "Fly Mode [เปิดระบบบิน]", 80)
+local tS, bS = createToggle(ContentPlayer, "WalkSpeed [วิ่งเร็วแรง]", 120)
+local tJ, bJ = createToggle(ContentPlayer, "High Jump [กระโดดสูง]", 160)
+
+local eA, eE, eF, eS, eJ, eC, eB = false, false, false, false, false, false, false
+local fov, fSpd, spd, jmp = 300, 50, 60, 120
+local bG, bV
+
+local function switchTab(activeBtn, targetContent, inactiveBtn, sourceContent)
+    targetContent.Visible, sourceContent.Visible = true, false
+    T:Create(activeBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(210, 0, 0), TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+    activeBtn.Font = Enum.Font.GothamBold
+    T:Create(inactiveBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(25, 25, 25), TextColor3 = Color3.fromRGB(160, 160, 160)}):Play()
+    inactiveBtn.Font = Enum.Font.GothamMedium
+end
+
+Tab1Btn.Activated:Connect(function() switchTab(Tab1Btn, ContentMain, Tab2Btn, ContentPlayer) end)
+Tab2Btn.Activated:Connect(function() switchTab(Tab2Btn, ContentPlayer, Tab1Btn, ContentMain) end)
+
+local function animToggle(st, s, b)
+    T:Create(s, TweenInfo.new(0.12), {BackgroundColor3 = st and Color3.fromRGB(60, 10, 10) or Color3.fromRGB(45, 45, 45)}):Play()
+    T:Create(b, TweenInfo.new(0.12), {
+        Position = st and UDim2.new(0, 22, 0, 2) or UDim2.new(0, 2, 0, 2),
+        BackgroundColor3 = st and Color3.fromRGB(210, 0, 0) or Color3.fromRGB(140, 140, 140)
+    }):Play()
+end
+
+tC.Activated:Connect(function() eC = not eC animToggle(eC, tC, bC) end)
+tB.Activated:Connect(function() eB = not eB animToggle(eB, tB, bB) end)
+
+btnT.Activated:Connect(function()
+    pcall(function()
+        local sv = RS:FindFirstChild("Modules") and RS.Modules:FindFirstChild("EventManagerClient") and RS.Modules.EventManagerClient:FindFirstChild("ServerEvent")
+        if sv then sv:FireServer("ExecuteThrow", {Result = "Green", Power = 100, Position = Vector2.new(C.ViewportSize.X / 2, C.ViewportSize.Y / 2)}) end
+    end)
+end)
+
+local dragToggle, dragStart, startPos
+TB.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragToggle = true dragStart = input.Position startPos = MF.Position
+        input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragToggle = false end end)
+    end
+end)
+UIS.InputChanged:Connect(function(input)
+    if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) and dragToggle then
