@@ -1,0 +1,702 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local TextChatService = game:GetService("TextChatService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Cam = workspace.CurrentCamera
+
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+if PlayerGui:FindFirstChild("ZxtataAkashiHub") then 
+    PlayerGui.ZxtataAkashiHub:Destroy() 
+end
+
+----------------------------------------------------
+-- CONFIGURATION
+----------------------------------------------------
+local DISCORD_LINK = "https://discord.gg/bTgS9Gwxf"
+local LOADING_MUSIC_ID = "rbxassetid://129098116998483" -- เปลี่ยนเป็น ID เพลงใหม่แล้วครับ
+local CLICK_SOUND_ID = "rbxassetid://131737037329240"
+local LOADING_IMAGE_ID = "rbxassetid://140637230317256"
+
+----------------------------------------------------
+-- SOUND SETUP
+----------------------------------------------------
+local LoadingMusic = Instance.new("Sound")
+LoadingMusic.Name = "AkashiLoadingMusic"
+LoadingMusic.SoundId = LOADING_MUSIC_ID
+LoadingMusic.Volume = 1
+LoadingMusic.Looped = false
+LoadingMusic.Parent = SoundService
+
+local ClickSound = Instance.new("Sound")
+ClickSound.Name = "AkashiClickSound"
+ClickSound.SoundId = CLICK_SOUND_ID
+ClickSound.Volume = 1
+ClickSound.Parent = SoundService
+
+local function playClickSound()
+    task.spawn(function()
+        if ClickSound.IsLoaded then
+            ClickSound:Play()
+        else
+            ClickSound.Loaded:Wait()
+            ClickSound:Play()
+        end
+    end)
+end
+
+----------------------------------------------------
+-- SCREEN GUI MAIN
+----------------------------------------------------
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ZxtataAkashiHub"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = PlayerGui
+
+-- Color Palette
+local C_BG = Color3.fromRGB(18, 18, 20)
+local C_TOPBAR = Color3.fromRGB(28, 28, 32)
+local C_CONTAINER = Color3.fromRGB(25, 25, 28)
+local C_RED = Color3.fromRGB(210, 0, 0)
+local C_TEXT = Color3.fromRGB(240, 240, 240)
+local C_MUTED = Color3.fromRGB(140, 140, 150)
+
+----------------------------------------------------
+-- LOADING SCREEN (23 SECONDS)
+----------------------------------------------------
+local LoadingFrame = Instance.new("Frame", ScreenGui)
+LoadingFrame.Size = UDim2.new(1, 0, 1, 0)
+LoadingFrame.BackgroundColor3 = Color3.fromRGB(160, 40, 50)
+LoadingFrame.BackgroundTransparency = 0.15
+LoadingFrame.ZIndex = 20000
+
+local ImageContainer = Instance.new("Frame", LoadingFrame)
+ImageContainer.Size = UDim2.new(0, 140, 0, 180)
+ImageContainer.Position = UDim2.new(0.5, -70, 0.35, -90)
+ImageContainer.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+ImageContainer.ZIndex = 20001
+Instance.new("UICorner", ImageContainer).CornerRadius = UDim.new(0, 12)
+
+local ImageStroke = Instance.new("UIStroke", ImageContainer)
+ImageStroke.Color = C_RED
+ImageStroke.Thickness = 2
+
+local LoadingImage = Instance.new("ImageLabel", ImageContainer)
+LoadingImage.Size = UDim2.new(1, 0, 1, 0)
+LoadingImage.Image = LOADING_IMAGE_ID
+LoadingImage.BackgroundTransparency = 1
+LoadingImage.ScaleType = Enum.ScaleType.Crop
+LoadingImage.ZIndex = 20002
+Instance.new("UICorner", LoadingImage).CornerRadius = UDim.new(0, 12)
+
+local LoadingText = Instance.new("TextLabel", LoadingFrame)
+LoadingText.Size = UDim2.new(0, 300, 0, 25)
+LoadingText.Position = UDim2.new(0.5, -150, 0.35, 105)
+LoadingText.Text = "Loading AKASI HUH... (0%)"
+LoadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
+LoadingText.Font = Enum.Font.GothamBold
+LoadingText.TextSize = 15
+LoadingText.BackgroundTransparency = 1
+LoadingText.ZIndex = 20001
+
+local BarBackground = Instance.new("Frame", LoadingFrame)
+BarBackground.Size = UDim2.new(0, 260, 0, 8)
+BarBackground.Position = UDim2.new(0.5, -130, 0.35, 135)
+BarBackground.BackgroundColor3 = Color3.fromRGB(30, 15, 20)
+BarBackground.ZIndex = 20001
+Instance.new("UICorner", BarBackground).CornerRadius = UDim.new(1, 0)
+
+local BarFill = Instance.new("Frame", BarBackground)
+BarFill.Size = UDim2.new(0, 0, 1, 0)
+BarFill.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+BarFill.ZIndex = 20002
+Instance.new("UICorner", BarFill).CornerRadius = UDim.new(1, 0)
+
+local DiscordText = Instance.new("TextLabel", LoadingFrame)
+DiscordText.Size = UDim2.new(0, 350, 0, 25)
+DiscordText.Position = UDim2.new(0.5, -175, 0.35, 155)
+DiscordText.Text = "Discord: " .. DISCORD_LINK
+DiscordText.TextColor3 = Color3.fromRGB(255, 220, 220)
+DiscordText.Font = Enum.Font.GothamSemibold
+DiscordText.TextSize = 13
+DiscordText.BackgroundTransparency = 1
+DiscordText.ZIndex = 20001
+
+----------------------------------------------------
+-- MAIN HUB UI
+----------------------------------------------------
+local ToggleBtn = Instance.new("TextButton", ScreenGui)
+ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
+ToggleBtn.Position = UDim2.new(0.02, 0, 0.25, 0)
+ToggleBtn.BackgroundColor3 = C_RED
+ToggleBtn.Text = "ZX"
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.Font = Enum.Font.GothamBold
+ToggleBtn.TextSize = 18
+ToggleBtn.Active = true
+ToggleBtn.Visible = false
+ToggleBtn.ZIndex = 9999
+Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1, 0)
+local StrokeBtn = Instance.new("UIStroke", ToggleBtn)
+StrokeBtn.Color = Color3.fromRGB(255, 255, 255)
+StrokeBtn.Thickness = 1.5
+
+local Main = Instance.new("Frame", ScreenGui)
+Main.Size = UDim2.new(0, 420, 0, 380)
+Main.Position = UDim2.new(0.5, -210, 0.5, -190)
+Main.BackgroundColor3 = C_BG
+Main.ClipsDescendants = true
+Main.Active = true
+Main.Visible = false
+Main.ZIndex = 10
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
+local MainStroke = Instance.new("UIStroke", Main)
+MainStroke.Color = C_RED
+MainStroke.Thickness = 1.5
+
+local function enableCustomDrag(frame, dragHandle)
+    local dragging, dragInput, dragStart, startPos
+    dragHandle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then dragging = false end
+            end)
+        end
+    end)
+    dragHandle.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+
+enableCustomDrag(ToggleBtn, ToggleBtn)
+
+local function toggleUI()
+    playClickSound()
+    Main.Visible = not Main.Visible
+end
+
+ToggleBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        toggleUI()
+    end
+end)
+
+-- Top Bar
+local TopBar = Instance.new("Frame", Main)
+TopBar.Size = UDim2.new(1, 0, 0, 40)
+TopBar.BackgroundColor3 = C_TOPBAR
+TopBar.ZIndex = 11
+Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 10)
+
+enableCustomDrag(Main, TopBar)
+
+local Title = Instance.new("TextLabel", TopBar)
+Title.Position = UDim2.new(0, 15, 0, 0)
+Title.Size = UDim2.new(0, 200, 1, 0)
+Title.Text = "AKASI HUH (TSBG UPDATED)"
+Title.TextColor3 = C_TEXT
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 13
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.BackgroundTransparency = 1
+Title.ZIndex = 12
+
+local CloseBtn = Instance.new("TextButton", TopBar)
+CloseBtn.Position = UDim2.new(1, -45, 0, 2)
+CloseBtn.Size = UDim2.new(0, 40, 0, 36)
+CloseBtn.Text = "✕"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 18
+CloseBtn.BackgroundTransparency = 1
+CloseBtn.ZIndex = 9999
+CloseBtn.Active = true
+
+CloseBtn.MouseButton1Click:Connect(function()
+    playClickSound()
+    Main.Visible = false
+end)
+
+-- Discord Banner
+local DiscordBar = Instance.new("TextButton", Main)
+DiscordBar.Position = UDim2.new(0, 12, 0, 46)
+DiscordBar.Size = UDim2.new(1, -24, 0, 28)
+DiscordBar.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+DiscordBar.Text = " Copy Discord Link"
+DiscordBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+DiscordBar.Font = Enum.Font.GothamBold
+DiscordBar.TextSize = 11
+DiscordBar.ZIndex = 12
+Instance.new("UICorner", DiscordBar).CornerRadius = UDim.new(0, 6)
+
+DiscordBar.MouseButton1Click:Connect(function()
+    playClickSound()
+    if setclipboard then
+        setclipboard(DISCORD_LINK)
+        DiscordBar.Text = " Copied to Clipboard!"
+        task.wait(2)
+        DiscordBar.Text = " Copy Discord Link"
+    end
+end)
+
+-- Tab Header (4 Tabs)
+local TabHeader = Instance.new("Frame", Main)
+TabHeader.Position = UDim2.new(0, 12, 0, 80)
+TabHeader.Size = UDim2.new(1, -24, 0, 30)
+TabHeader.BackgroundTransparency = 1
+TabHeader.ZIndex = 11
+
+local TabFarmBtn = Instance.new("TextButton", TabHeader)
+TabFarmBtn.Size = UDim2.new(0, 95, 1, 0)
+TabFarmBtn.Position = UDim2.new(0, 0, 0, 0)
+TabFarmBtn.BackgroundColor3 = C_RED
+TabFarmBtn.Text = "Farming"
+TabFarmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+TabFarmBtn.Font = Enum.Font.GothamBold
+TabFarmBtn.TextSize = 10
+TabFarmBtn.ZIndex = 12
+Instance.new("UICorner", TabFarmBtn).CornerRadius = UDim.new(0, 6)
+
+local TabVisualsBtn = Instance.new("TextButton", TabHeader)
+TabVisualsBtn.Size = UDim2.new(0, 95, 1, 0)
+TabVisualsBtn.Position = UDim2.new(0, 100, 0, 0)
+TabVisualsBtn.BackgroundColor3 = C_CONTAINER
+TabVisualsBtn.Text = "Visuals"
+TabVisualsBtn.TextColor3 = C_MUTED
+TabVisualsBtn.Font = Enum.Font.GothamBold
+TabVisualsBtn.TextSize = 10
+TabVisualsBtn.ZIndex = 12
+Instance.new("UICorner", TabVisualsBtn).CornerRadius = UDim.new(0, 6)
+
+local TabTSBGBtn = Instance.new("TextButton", TabHeader)
+TabTSBGBtn.Size = UDim2.new(0, 100, 1, 0)
+TabTSBGBtn.Position = UDim2.new(0, 200, 0, 0)
+TabTSBGBtn.BackgroundColor3 = C_CONTAINER
+TabTSBGBtn.Text = "สนามรบ (TSBG)"
+TabTSBGBtn.TextColor3 = C_MUTED
+TabTSBGBtn.Font = Enum.Font.GothamBold
+TabTSBGBtn.TextSize = 10
+TabTSBGBtn.ZIndex = 12
+Instance.new("UICorner", TabTSBGBtn).CornerRadius = UDim.new(0, 6)
+
+local TabWordBtn = Instance.new("TextButton", TabHeader)
+TabWordBtn.Size = UDim2.new(0, 90, 1, 0)
+TabWordBtn.Position = UDim2.new(0, 305, 0, 0)
+TabWordBtn.BackgroundColor3 = C_CONTAINER
+TabWordBtn.Text = "Word Blitz"
+TabWordBtn.TextColor3 = C_MUTED
+TabWordBtn.Font = Enum.Font.GothamBold
+TabWordBtn.TextSize = 10
+TabWordBtn.ZIndex = 12
+Instance.new("UICorner", TabWordBtn).CornerRadius = UDim.new(0, 6)
+
+-- Pages Container
+local PageContainer = Instance.new("Frame", Main)
+PageContainer.Position = UDim2.new(0, 12, 0, 118)
+PageContainer.Size = UDim2.new(1, -24, 1, -126)
+PageContainer.BackgroundTransparency = 1
+PageContainer.ZIndex = 11
+
+local FarmPage = Instance.new("ScrollingFrame", PageContainer)
+FarmPage.Size = UDim2.new(1, 0, 1, 0)
+FarmPage.BackgroundTransparency = 1
+FarmPage.ScrollBarThickness = 2
+FarmPage.ScrollBarImageColor3 = C_RED
+FarmPage.ZIndex = 12
+
+local VisualsPage = Instance.new("ScrollingFrame", PageContainer)
+VisualsPage.Size = UDim2.new(1, 0, 1, 0)
+VisualsPage.BackgroundTransparency = 1
+VisualsPage.ScrollBarThickness = 2
+VisualsPage.ScrollBarImageColor3 = C_RED
+VisualsPage.Visible = false
+VisualsPage.ZIndex = 12
+
+local TSBGPage = Instance.new("ScrollingFrame", PageContainer)
+TSBGPage.Size = UDim2.new(1, 0, 1, 0)
+TSBGPage.BackgroundTransparency = 1
+TSBGPage.ScrollBarThickness = 2
+TSBGPage.ScrollBarImageColor3 = C_RED
+TSBGPage.Visible = false
+TSBGPage.ZIndex = 12
+
+local WordPage = Instance.new("ScrollingFrame", PageContainer)
+WordPage.Size = UDim2.new(1, 0, 1, 0)
+WordPage.BackgroundTransparency = 1
+WordPage.ScrollBarThickness = 2
+WordPage.ScrollBarImageColor3 = C_RED
+WordPage.Visible = false
+WordPage.ZIndex = 12
+
+Instance.new("UIListLayout", FarmPage).Padding = UDim.new(0, 6)
+Instance.new("UIListLayout", VisualsPage).Padding = UDim.new(0, 6)
+Instance.new("UIListLayout", TSBGPage).Padding = UDim.new(0, 6)
+Instance.new("UIListLayout", WordPage).Padding = UDim.new(0, 6)
+
+local function switchTab(tabIndex)
+    playClickSound()
+    FarmPage.Visible = (tabIndex == 1)
+    VisualsPage.Visible = (tabIndex == 2)
+    TSBGPage.Visible = (tabIndex == 3)
+    WordPage.Visible = (tabIndex == 4)
+    
+    TabFarmBtn.BackgroundColor3 = (tabIndex == 1) and C_RED or C_CONTAINER
+    TabFarmBtn.TextColor3 = (tabIndex == 1) and Color3.fromRGB(255, 255, 255) or C_MUTED
+    
+    TabVisualsBtn.BackgroundColor3 = (tabIndex == 2) and C_RED or C_CONTAINER
+    TabVisualsBtn.TextColor3 = (tabIndex == 2) and Color3.fromRGB(255, 255, 255) or C_MUTED
+    
+    TabTSBGBtn.BackgroundColor3 = (tabIndex == 3) and C_RED or C_CONTAINER
+    TabTSBGBtn.TextColor3 = (tabIndex == 3) and Color3.fromRGB(255, 255, 255) or C_MUTED
+
+    TabWordBtn.BackgroundColor3 = (tabIndex == 4) and C_RED or C_CONTAINER
+    TabWordBtn.TextColor3 = (tabIndex == 4) and Color3.fromRGB(255, 255, 255) or C_MUTED
+end
+
+TabFarmBtn.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then switchTab(1) end end)
+TabVisualsBtn.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then switchTab(2) end end)
+TabTSBGBtn.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then switchTab(3) end end)
+TabWordBtn.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then switchTab(4) end end)
+
+-- UI Helpers
+local function CreateToggle(parent, text, callback)
+    local Frame = Instance.new("Frame", parent)
+    Frame.Size = UDim2.new(1, -6, 0, 38)
+    Frame.BackgroundColor3 = C_CONTAINER
+    Frame.ZIndex = 13
+    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 6)
+    
+    local Label = Instance.new("TextLabel", Frame)
+    Label.Position = UDim2.new(0, 10, 0, 0)
+    Label.Size = UDim2.new(0.7, 0, 1, 0)
+    Label.Text = text
+    Label.TextColor3 = C_TEXT
+    Label.Font = Enum.Font.GothamSemibold
+    Label.TextSize = 11
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.BackgroundTransparency = 1
+    Label.ZIndex = 14
+    
+    local ToggleBg = Instance.new("TextButton", Frame)
+    ToggleBg.Position = UDim2.new(1, -46, 0.5, -9)
+    ToggleBg.Size = UDim2.new(0, 36, 0, 18)
+    ToggleBg.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+    ToggleBg.Text = ""
+    ToggleBg.ZIndex = 14
+    Instance.new("UICorner", ToggleBg).CornerRadius = UDim.new(1, 0)
+    
+    local Circle = Instance.new("Frame", ToggleBg)
+    Circle.Size = UDim2.new(0, 14, 0, 14)
+    Circle.Position = UDim2.new(0, 2, 0.5, -7)
+    Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Circle.ZIndex = 15
+    Instance.new("UICorner", Circle).CornerRadius = UDim.new(1, 0)
+    
+    local state = false
+    local function toggleState()
+        playClickSound()
+        state = not state
+        TweenService:Create(ToggleBg, TweenInfo.new(0.12), {BackgroundColor3 = state and C_RED or Color3.fromRGB(45, 45, 50)}):Play()
+        TweenService:Create(Circle, TweenInfo.new(0.12), {Position = state and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)}):Play()
+        callback(state)
+    end
+    
+    ToggleBg.InputBegan:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+            toggleState()
+        end
+    end)
+end
+
+local function CreateSlider(parent, text, min, max, default, callback)
+    local Frame = Instance.new("Frame", parent)
+    Frame.Size = UDim2.new(1, -6, 0, 46)
+    Frame.BackgroundColor3 = C_CONTAINER
+    Frame.ZIndex = 13
+    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 6)
+    
+    local Label = Instance.new("TextLabel", Frame)
+    Label.Position = UDim2.new(0, 10, 0, 4)
+    Label.Size = UDim2.new(0.6, 0, 0, 18)
+    Label.Text = text
+    Label.TextColor3 = C_TEXT
+    Label.Font = Enum.Font.GothamSemibold
+    Label.TextSize = 10
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.BackgroundTransparency = 1
+    Label.ZIndex = 14
+    
+    local ValLabel = Instance.new("TextLabel", Frame)
+    ValLabel.Position = UDim2.new(0.65, 0, 0, 4)
+    ValLabel.Size = UDim2.new(0.3, 0, 0, 18)
+    ValLabel.Text = tostring(default)
+    ValLabel.TextColor3 = C_RED
+    ValLabel.Font = Enum.Font.GothamBold
+    ValLabel.TextSize = 10
+    ValLabel.TextXAlignment = Enum.TextXAlignment.Right
+    ValLabel.BackgroundTransparency = 1
+    ValLabel.ZIndex = 14
+    
+    local SliderBtn = Instance.new("TextButton", Frame)
+    SliderBtn.Position = UDim2.new(0, 10, 0, 28)
+    SliderBtn.Size = UDim2.new(1, -20, 0, 6)
+    SliderBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+    SliderBtn.Text = ""
+    SliderBtn.ZIndex = 14
+    Instance.new("UICorner", SliderBtn).CornerRadius = UDim.new(1, 0)
+    
+    local SliderFill = Instance.new("Frame", SliderBtn)
+    SliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
+    SliderFill.BackgroundColor3 = C_RED
+    SliderFill.ZIndex = 15
+    Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
+    
+    local isDragging = false
+    local function UpdateSlider(input)
+        local pos = math.clamp((input.Position.X - SliderBtn.AbsolutePosition.X) / SliderBtn.AbsoluteSize.X, 0, 1)
+        SliderFill.Size = UDim2.new(pos, 0, 1, 0)
+        local val = math.floor(min + (pos * (max - min)))
+        ValLabel.Text = tostring(val)
+        callback(val)
+    end
+    
+    SliderBtn.InputBegan:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+            isDragging = true
+            UpdateSlider(i)
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(i)
+        if isDragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+            UpdateSlider(i)
+        end
+    end)
+    
+    UserInputService.InputEnded:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+            isDragging = false
+        end
+    end)
+end
+
+----------------------------------------------------
+-- SCRIPT LOGIC & VARIABLES
+----------------------------------------------------
+local eA, eE, eF, eS, eJ, eH, eSelfH, eInvis, autoClick = false, false, false, false, false, false, false, false, false
+local fR, flySpd, aS, aJ, clickDelay, selfHSize = 300, 50, 60, 120, 0.1, 10
+local bG, bV = nil, nil
+
+-- TSBG SPECIFIC VARS
+local autoBlockTSBG = false
+local tsbgHitboxSize = 15
+local tsbgHitbox = false
+local antiKnockback = false
+
+-- AUTO BLOCK LOGIC FOR TSBG
+task.spawn(function()
+    while true do
+        if autoBlockTSBG then
+            pcall(function()
+                local myChar = LocalPlayer.Character
+                local myHrp = myChar and myChar:FindFirstChild("HumanoidRootPart")
+                if myHrp then
+                    for _, p in ipairs(Players:GetPlayers()) do
+                        if p ~= LocalPlayer and p.Character then
+                            local pHrp = p.Character:FindFirstChild("HumanoidRootPart")
+                            if pHrp and (pHrp.Position - myHrp.Position).Magnitude <= 15 then
+                                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game)
+                                task.wait(0.1)
+                                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.F, false, game)
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+        task.wait(0.05)
+    end
+end)
+
+local function doEsp(ch, st)
+    local h = ch:FindFirstChild("AkashiESP")
+    if st and not h then 
+        h = Instance.new("Highlight", ch) 
+        h.Name = "AkashiESP" 
+        h.FillColor = C_RED 
+        h.OutlineColor = Color3.fromRGB(255,255,255) 
+        h.FillTransparency = 0.5 
+        h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    elseif not st and h then 
+        h:Destroy() 
+    end
+end
+
+local function fl()
+    local c = LocalPlayer.Character 
+    local hrp, hum = c and c:FindFirstChild("HumanoidRootPart"), c and c:FindFirstChildOfClass("Humanoid") 
+    if not hrp or not hum then return end
+    
+    bG, bV = Instance.new("BodyGyro", hrp), Instance.new("BodyVelocity", hrp) 
+    bG.P, bG.maxTorque, bG.cframe = 9e4, Vector3.new(9e9,9e9,9e9), hrp.CFrame 
+    bV.velocity, bV.maxForce, hum.PlatformStand = Vector3.new(0,0.1,0), Vector3.new(9e9,9e9,9e9), true
+end
+
+local function noFl()
+    if bG then bG:Destroy() end 
+    if bV then bV:Destroy() end 
+    local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") 
+    if hum then hum.PlatformStand = false end
+end
+
+----------------------------------------------------
+-- UI SETUP MENU ITEMS
+----------------------------------------------------
+
+-- FARMING TAB
+CreateToggle(FarmPage, "Auto Click (ออโต้คลิก)", function(val) autoClick = val end)
+CreateSlider(FarmPage, "Click Delay (ms)", 10, 500, 100, function(val) clickDelay = val / 1000 end)
+CreateToggle(FarmPage, "Fly Mode (บิน)", function(val) eF = val if eF then fl() else noFl() end end)
+CreateToggle(FarmPage, "WalkSpeed (วิ่งเร็ว)", function(val) eS = val end)
+CreateToggle(FarmPage, "High Jump (กระโดดสูง)", function(val) eJ = val end)
+
+-- VISUALS TAB
+CreateToggle(VisualsPage, "Aimbot (ล็อกเป้า)", function(val) eA = val end)
+CreateToggle(VisualsPage, "Player ESP (มองทะลุ)", function(val)
+    eE = val
+    if not eE then 
+        for _, p in ipairs(Players:GetPlayers()) do 
+            if p.Character then doEsp(p.Character, false) end 
+        end 
+    end
+end)
+
+-- TSBG (สนามรบที่แข็งแกร่ง) TAB
+CreateToggle(TSBGPage, "Auto Block (กันอัตโนมัติ)", function(val)
+    autoBlockTSBG = val
+end)
+
+CreateToggle(TSBGPage, "Expand Hitbox (ขยายฮิตบ็อกซ์ศัตรู)", function(val)
+    tsbgHitbox = val
+    if not tsbgHitbox then
+        for _, p in ipairs(Players:GetPlayers()) do 
+            if p ~= LocalPlayer and p.Character then 
+                local h = p.Character:FindFirstChild("HumanoidRootPart") 
+                if h then h.Size, h.Transparency, h.CanCollide = Vector3.new(2,2,1), 1, true end 
+            end 
+        end
+    end
+end)
+
+CreateSlider(TSBGPage, "Hitbox Size (ขนาดฮิตบ็อกซ์)", 5, 50, 15, function(val)
+    tsbgHitboxSize = val
+end)
+
+CreateToggle(TSBGPage, "Anti Knockback (กันกระเด็น)", function(val)
+    antiKnockback = val
+end)
+
+----------------------------------------------------
+-- MAIN LOOP
+----------------------------------------------------
+RunService.RenderStepped:Connect(function()
+    Cam = workspace.CurrentCamera
+    local c = LocalPlayer.Character 
+    local hum = c and c:FindFirstChildOfClass("Humanoid")
+    local myHrp = c and c:FindFirstChild("HumanoidRootPart")
+    
+    if hum then 
+        hum.WalkSpeed = eS and aS or 16 
+        if eJ then 
+            if hum.UseJumpPower then hum.JumpPower = aJ else hum.JumpHeight = aJ/2 end 
+        else 
+            if hum.UseJumpPower then hum.JumpPower = 50 else hum.JumpHeight = 7.2 end 
+        end 
+    end
+
+    if antiKnockback and myHrp then
+        myHrp.Velocity = Vector3.new(0, myHrp.Velocity.Y, 0)
+    end
+
+    if tsbgHitbox then
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character then 
+                local hrp = player.Character:FindFirstChild("HumanoidRootPart") 
+                if hrp and player.Character:FindFirstChildOfClass("Humanoid") and player.Character:FindFirstChildOfClass("Humanoid").Health > 0 then 
+                    hrp.Size = Vector3.new(tsbgHitboxSize, tsbgHitboxSize, tsbgHitboxSize)
+                    hrp.Transparency = 0.7 
+                    hrp.BrickColor = BrickColor.new("Really red") 
+                    hrp.CanCollide = false 
+                end 
+            end
+        end
+    end
+    
+    if eE then 
+        for _, player in ipairs(Players:GetPlayers()) do 
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChildOfClass("Humanoid") and player.Character:FindFirstChildOfClass("Humanoid").Health > 0 then 
+                doEsp(player.Character, true) 
+            end 
+        end 
+    end
+    
+    if eF and bV and bG and c and c:FindFirstChild("HumanoidRootPart") and hum then 
+        bG.cframe = Cam.CFrame 
+        local md = hum.MoveDirection 
+        bV.velocity = md.Magnitude > 0 and Cam.CFrame:VectorToWorldSpace(Vector3.new(md.X, 0, md.Z).Unit * flySpd) or Vector3.new(0, 0.1, 0) 
+    end
+end)
+
+----------------------------------------------------
+-- EXECUTE LOADING (23 SECONDS)
+----------------------------------------------------
+task.spawn(function()
+    if LoadingMusic.IsLoaded then
+        LoadingMusic:Play()
+    else
+        LoadingMusic.Loaded:Wait()
+        LoadingMusic:Play()
+    end
+    
+    local duration = 23
+    local steps = 100
+    for i = 1, steps do
+        local progress = i / steps
+        BarFill.Size = UDim2.new(progress, 0, 1, 0)
+        LoadingText.Text = "Loading AKASI HUH... (" .. math.floor(progress * 100) .. "%)"
+        task.wait(duration / steps)
+    end
+    
+    LoadingMusic:Stop()
+    TweenService:Create(LoadingFrame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(LoadingImage, TweenInfo.new(0.5), {ImageTransparency = 1}):Play()
+    TweenService:Create(ImageContainer, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(ImageStroke, TweenInfo.new(0.5), {Transparency = 1}):Play()
+    TweenService:Create(LoadingText, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+    TweenService:Create(DiscordText, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+    TweenService:Create(BarBackground, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(BarFill, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+    
+    task.wait(0.5)
+    LoadingFrame:Destroy()
+    
+    ToggleBtn.Visible = true
+    Main.Visible = true
+    playClickSound()
+end)
