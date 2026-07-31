@@ -1,0 +1,903 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local TextChatService = game:GetService("TextChatService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ContentProvider = game:GetService("ContentProvider")
+local Cam = workspace.CurrentCamera
+
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+if PlayerGui:FindFirstChild("ZxtataAkashiHub") then 
+    PlayerGui.ZxtataAkashiHub:Destroy() 
+end
+
+----------------------------------------------------
+-- CONFIGURATION
+----------------------------------------------------
+local DISCORD_LINK = "https://discord.gg/bTgS9Gwxf"
+local LOADING_MUSIC_ID = "rbxassetid://129098116998483"
+local CLICK_SOUND_ID = "rbxassetid://131737037329240"
+
+-- รูปหลัก และ รูปสำรอง
+local PRIMARY_IMAGE_ID = "rbxassetid://140637230317256"
+local FALLBACK_IMAGE_ID = "rbxassetid://10915908226" 
+
+----------------------------------------------------
+-- SOUND SETUP
+----------------------------------------------------
+local LoadingMusic = Instance.new("Sound")
+LoadingMusic.Name = "AkashiLoadingMusic"
+LoadingMusic.SoundId = LOADING_MUSIC_ID
+LoadingMusic.Volume = 1
+LoadingMusic.Looped = false
+LoadingMusic.Parent = SoundService
+
+local ClickSound = Instance.new("Sound")
+ClickSound.Name = "AkashiClickSound"
+ClickSound.SoundId = CLICK_SOUND_ID
+ClickSound.Volume = 1
+ClickSound.Parent = SoundService
+
+local function playClickSound()
+    task.spawn(function()
+        if ClickSound.IsLoaded then
+            ClickSound:Play()
+        else
+            ClickSound.Loaded:Wait()
+            ClickSound:Play()
+        end
+    end)
+end
+
+----------------------------------------------------
+-- SCREEN GUI MAIN
+----------------------------------------------------
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ZxtataAkashiHub"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = PlayerGui
+
+-- Color Palette
+local C_BG = Color3.fromRGB(18, 18, 20)
+local C_TOPBAR = Color3.fromRGB(28, 28, 32)
+local C_CONTAINER = Color3.fromRGB(25, 25, 28)
+local C_RED = Color3.fromRGB(210, 0, 0)
+local C_TEXT = Color3.fromRGB(240, 240, 240)
+local C_MUTED = Color3.fromRGB(140, 140, 150)
+
+----------------------------------------------------
+-- LOADING SCREEN (23 SECONDS)
+----------------------------------------------------
+local LoadingFrame = Instance.new("Frame", ScreenGui)
+LoadingFrame.Size = UDim2.new(1, 0, 1, 0)
+LoadingFrame.BackgroundColor3 = Color3.fromRGB(160, 40, 50)
+LoadingFrame.BackgroundTransparency = 0.15
+LoadingFrame.ZIndex = 20000
+
+local ImageContainer = Instance.new("Frame", LoadingFrame)
+ImageContainer.Size = UDim2.new(0, 140, 0, 180)
+ImageContainer.Position = UDim2.new(0.5, -70, 0.35, -90)
+ImageContainer.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+ImageContainer.ZIndex = 20001
+Instance.new("UICorner", ImageContainer).CornerRadius = UDim.new(0, 12)
+
+local ImageStroke = Instance.new("UIStroke", ImageContainer)
+ImageStroke.Color = C_RED
+ImageStroke.Thickness = 2
+
+local LoadingImage = Instance.new("ImageLabel", ImageContainer)
+LoadingImage.Size = UDim2.new(1, 0, 1, 0)
+LoadingImage.Image = PRIMARY_IMAGE_ID
+LoadingImage.BackgroundTransparency = 1
+LoadingImage.ScaleType = Enum.ScaleType.Crop
+LoadingImage.ZIndex = 20002
+Instance.new("UICorner", LoadingImage).CornerRadius = UDim.new(0, 12)
+
+task.spawn(function()
+    pcall(function()
+        ContentProvider:PreloadAsync({LoadingImage})
+    end)
+    if not LoadingImage.IsLoaded then
+        LoadingImage.Image = FALLBACK_IMAGE_ID
+    end
+end)
+
+local LoadingText = Instance.new("TextLabel", LoadingFrame)
+LoadingText.Size = UDim2.new(0, 300, 0, 25)
+LoadingText.Position = UDim2.new(0.5, -150, 0.35, 105)
+LoadingText.Text = "Loading AKASI HUH... (0%)"
+LoadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
+LoadingText.Font = Enum.Font.GothamBold
+LoadingText.TextSize = 15
+LoadingText.BackgroundTransparency = 1
+LoadingText.ZIndex = 20001
+
+local BarBackground = Instance.new("Frame", LoadingFrame)
+BarBackground.Size = UDim2.new(0, 260, 0, 8)
+BarBackground.Position = UDim2.new(0.5, -130, 0.35, 135)
+BarBackground.BackgroundColor3 = Color3.fromRGB(30, 15, 20)
+BarBackground.ZIndex = 20001
+Instance.new("UICorner", BarBackground).CornerRadius = UDim.new(1, 0)
+
+local BarFill = Instance.new("Frame", BarBackground)
+BarFill.Size = UDim2.new(0, 0, 1, 0)
+BarFill.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+BarFill.ZIndex = 20002
+Instance.new("UICorner", BarFill).CornerRadius = UDim.new(1, 0)
+
+local DiscordText = Instance.new("TextLabel", LoadingFrame)
+DiscordText.Size = UDim2.new(0, 350, 0, 25)
+DiscordText.Position = UDim2.new(0.5, -175, 0.35, 155)
+DiscordText.Text = "Discord: " .. DISCORD_LINK
+DiscordText.TextColor3 = Color3.fromRGB(255, 220, 220)
+DiscordText.Font = Enum.Font.GothamSemibold
+DiscordText.TextSize = 13
+DiscordText.BackgroundTransparency = 1
+DiscordText.ZIndex = 20001
+
+----------------------------------------------------
+-- MAIN HUB UI
+----------------------------------------------------
+local ToggleBtn = Instance.new("TextButton", ScreenGui)
+ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
+ToggleBtn.Position = UDim2.new(0.02, 0, 0.25, 0)
+ToggleBtn.BackgroundColor3 = C_RED
+ToggleBtn.Text = "ZX"
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.Font = Enum.Font.GothamBold
+ToggleBtn.TextSize = 18
+ToggleBtn.Active = true
+ToggleBtn.Visible = false
+ToggleBtn.ZIndex = 9999
+Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1, 0)
+local StrokeBtn = Instance.new("UIStroke", ToggleBtn)
+StrokeBtn.Color = Color3.fromRGB(255, 255, 255)
+StrokeBtn.Thickness = 1.5
+
+local Main = Instance.new("Frame", ScreenGui)
+Main.Size = UDim2.new(0, 400, 0, 360)
+Main.Position = UDim2.new(0.5, -200, 0.5, -180)
+Main.BackgroundColor3 = C_BG
+Main.ClipsDescendants = true
+Main.Active = true
+Main.Visible = false
+Main.ZIndex = 10
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
+local MainStroke = Instance.new("UIStroke", Main)
+MainStroke.Color = C_RED
+MainStroke.Thickness = 1.5
+
+local function enableCustomDrag(frame, dragHandle)
+    local dragging, dragInput, dragStart, startPos
+    dragHandle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then dragging = false end
+            end)
+        end
+    end)
+    dragHandle.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+
+enableCustomDrag(ToggleBtn, ToggleBtn)
+
+local function toggleUI()
+    playClickSound()
+    Main.Visible = not Main.Visible
+end
+
+ToggleBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        toggleUI()
+    end
+end)
+
+-- Top Bar
+local TopBar = Instance.new("Frame", Main)
+TopBar.Size = UDim2.new(1, 0, 0, 40)
+TopBar.BackgroundColor3 = C_TOPBAR
+TopBar.ZIndex = 11
+Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 10)
+
+enableCustomDrag(Main, TopBar)
+
+local Title = Instance.new("TextLabel", TopBar)
+Title.Position = UDim2.new(0, 15, 0, 0)
+Title.Size = UDim2.new(0, 200, 1, 0)
+Title.Text = "AKASI HUH"
+Title.TextColor3 = C_TEXT
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 13
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.BackgroundTransparency = 1
+Title.ZIndex = 12
+
+local CloseBtn = Instance.new("TextButton", TopBar)
+CloseBtn.Position = UDim2.new(1, -45, 0, 2)
+CloseBtn.Size = UDim2.new(0, 40, 0, 36)
+CloseBtn.Text = "✕"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 18
+CloseBtn.BackgroundTransparency = 1
+CloseBtn.ZIndex = 9999
+CloseBtn.Active = true
+
+CloseBtn.MouseButton1Click:Connect(function()
+    playClickSound()
+    Main.Visible = false
+end)
+
+-- Discord Banner
+local DiscordBar = Instance.new("TextButton", Main)
+DiscordBar.Position = UDim2.new(0, 12, 0, 46)
+DiscordBar.Size = UDim2.new(1, -24, 0, 28)
+DiscordBar.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+DiscordBar.Text = " Copy Discord Link"
+DiscordBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+DiscordBar.Font = Enum.Font.GothamBold
+DiscordBar.TextSize = 11
+DiscordBar.ZIndex = 12
+Instance.new("UICorner", DiscordBar).CornerRadius = UDim.new(0, 6)
+
+DiscordBar.MouseButton1Click:Connect(function()
+    playClickSound()
+    if setclipboard then
+        setclipboard(DISCORD_LINK)
+        DiscordBar.Text = " Copied to Clipboard!"
+        task.wait(2)
+        DiscordBar.Text = " Copy Discord Link"
+    end
+end)
+
+-- Tab Header (5 Tabs: Farming, Raise a Farm, Visuals, Finish Word, Music)
+local TabHeader = Instance.new("Frame", Main)
+TabHeader.Position = UDim2.new(0, 12, 0, 80)
+TabHeader.Size = UDim2.new(1, -24, 0, 30)
+TabHeader.BackgroundTransparency = 1
+TabHeader.ZIndex = 11
+
+local function createTabBtn(name, posX, sizeX)
+    local btn = Instance.new("TextButton", TabHeader)
+    btn.Size = UDim2.new(0, sizeX, 1, 0)
+    btn.Position = UDim2.new(0, posX, 0, 0)
+    btn.BackgroundColor3 = C_CONTAINER
+    btn.Text = name
+    btn.TextColor3 = C_MUTED
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 9
+    btn.ZIndex = 12
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+    return btn
+end
+
+local TabFarmBtn = createTabBtn("Farming", 0, 72)
+local TabRaiseFarmBtn = createTabBtn("Raise Farm", 75, 75)
+local TabVisualsBtn = createTabBtn("Visuals", 153, 72)
+local TabWordBtn = createTabBtn("Finish Word", 228, 75)
+local TabMusicBtn = createTabBtn("Music", 306, 70)
+
+-- Pages Container
+local PageContainer = Instance.new("Frame", Main)
+PageContainer.Position = UDim2.new(0, 12, 0, 118)
+PageContainer.Size = UDim2.new(1, -24, 1, -126)
+PageContainer.BackgroundTransparency = 1
+PageContainer.ZIndex = 11
+
+local function createPage()
+    local page = Instance.new("ScrollingFrame", PageContainer)
+    page.Size = UDim2.new(1, 0, 1, 0)
+    page.BackgroundTransparency = 1
+    page.ScrollBarThickness = 2
+    page.ScrollBarImageColor3 = C_RED
+    page.Visible = false
+    page.ZIndex = 12
+    Instance.new("UIListLayout", page).Padding = UDim.new(0, 6)
+    return page
+end
+
+local FarmPage = createPage()
+local RaiseFarmPage = createPage()
+local VisualsPage = createPage()
+local WordPage = createPage()
+local MusicPage = createPage()
+
+-- เปิดหน้าแรกตั้งต้น
+FarmPage.Visible = true
+TabFarmBtn.BackgroundColor3 = C_RED
+TabFarmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local function switchTab(tabIndex)
+    playClickSound()
+    FarmPage.Visible = (tabIndex == 1)
+    RaiseFarmPage.Visible = (tabIndex == 2)
+    VisualsPage.Visible = (tabIndex == 3)
+    WordPage.Visible = (tabIndex == 4)
+    MusicPage.Visible = (tabIndex == 5)
+    
+    local tabs = {TabFarmBtn, TabRaiseFarmBtn, TabVisualsBtn, TabWordBtn, TabMusicBtn}
+    for i, btn in ipairs(tabs) do
+        btn.BackgroundColor3 = (i == tabIndex) and C_RED or C_CONTAINER
+        btn.TextColor3 = (i == tabIndex) and Color3.fromRGB(255, 255, 255) or C_MUTED
+    end
+end
+
+TabFarmBtn.MouseButton1Click:Connect(function() switchTab(1) end)
+TabRaiseFarmBtn.MouseButton1Click:Connect(function() switchTab(2) end)
+TabVisualsBtn.MouseButton1Click:Connect(function() switchTab(3) end)
+TabWordBtn.MouseButton1Click:Connect(function() switchTab(4) end)
+TabMusicBtn.MouseButton1Click:Connect(function() switchTab(5) end)
+
+-- UI Helpers
+local function CreateToggle(parent, text, callback)
+    local Frame = Instance.new("Frame", parent)
+    Frame.Size = UDim2.new(1, -6, 0, 38)
+    Frame.BackgroundColor3 = C_CONTAINER
+    Frame.ZIndex = 13
+    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 6)
+    
+    local Label = Instance.new("TextLabel", Frame)
+    Label.Position = UDim2.new(0, 10, 0, 0)
+    Label.Size = UDim2.new(0.7, 0, 1, 0)
+    Label.Text = text
+    Label.TextColor3 = C_TEXT
+    Label.Font = Enum.Font.GothamSemibold
+    Label.TextSize = 11
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.BackgroundTransparency = 1
+    Label.ZIndex = 14
+    
+    local ToggleBg = Instance.new("TextButton", Frame)
+    ToggleBg.Position = UDim2.new(1, -46, 0.5, -9)
+    ToggleBg.Size = UDim2.new(0, 36, 0, 18)
+    ToggleBg.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+    ToggleBg.Text = ""
+    ToggleBg.ZIndex = 14
+    Instance.new("UICorner", ToggleBg).CornerRadius = UDim.new(1, 0)
+    
+    local Circle = Instance.new("Frame", ToggleBg)
+    Circle.Size = UDim2.new(0, 14, 0, 14)
+    Circle.Position = UDim2.new(0, 2, 0.5, -7)
+    Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Circle.ZIndex = 15
+    Instance.new("UICorner", Circle).CornerRadius = UDim.new(1, 0)
+    
+    local state = false
+    ToggleBg.MouseButton1Click:Connect(function()
+        playClickSound()
+        state = not state
+        TweenService:Create(ToggleBg, TweenInfo.new(0.12), {BackgroundColor3 = state and C_RED or Color3.fromRGB(45, 45, 50)}):Play()
+        TweenService:Create(Circle, TweenInfo.new(0.12), {Position = state and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)}):Play()
+        callback(state)
+    end)
+end
+
+local function CreateSlider(parent, text, min, max, default, callback)
+    local Frame = Instance.new("Frame", parent)
+    Frame.Size = UDim2.new(1, -6, 0, 46)
+    Frame.BackgroundColor3 = C_CONTAINER
+    Frame.ZIndex = 13
+    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 6)
+    
+    local Label = Instance.new("TextLabel", Frame)
+    Label.Position = UDim2.new(0, 10, 0, 4)
+    Label.Size = UDim2.new(0.6, 0, 0, 18)
+    Label.Text = text
+    Label.TextColor3 = C_TEXT
+    Label.Font = Enum.Font.GothamSemibold
+    Label.TextSize = 10
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.BackgroundTransparency = 1
+    Label.ZIndex = 14
+    
+    local ValLabel = Instance.new("TextLabel", Frame)
+    ValLabel.Position = UDim2.new(0.65, 0, 0, 4)
+    ValLabel.Size = UDim2.new(0.3, 0, 0, 18)
+    ValLabel.Text = tostring(default)
+    ValLabel.TextColor3 = C_RED
+    ValLabel.Font = Enum.Font.GothamBold
+    ValLabel.TextSize = 10
+    ValLabel.TextXAlignment = Enum.TextXAlignment.Right
+    ValLabel.BackgroundTransparency = 1
+    ValLabel.ZIndex = 14
+    
+    local SliderBtn = Instance.new("TextButton", Frame)
+    SliderBtn.Position = UDim2.new(0, 10, 0, 28)
+    SliderBtn.Size = UDim2.new(1, -20, 0, 6)
+    SliderBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+    SliderBtn.Text = ""
+    SliderBtn.ZIndex = 14
+    Instance.new("UICorner", SliderBtn).CornerRadius = UDim.new(1, 0)
+    
+    local SliderFill = Instance.new("Frame", SliderBtn)
+    SliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
+    SliderFill.BackgroundColor3 = C_RED
+    SliderFill.ZIndex = 15
+    Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
+    
+    local isDragging = false
+    local function UpdateSlider(input)
+        local pos = math.clamp((input.Position.X - SliderBtn.AbsolutePosition.X) / SliderBtn.AbsoluteSize.X, 0, 1)
+        SliderFill.Size = UDim2.new(pos, 0, 1, 0)
+        local val = math.floor(min + (pos * (max - min)))
+        ValLabel.Text = tostring(val)
+        callback(val)
+    end
+    
+    SliderBtn.InputBegan:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+            isDragging = true
+            UpdateSlider(i)
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(i)
+        if isDragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+            UpdateSlider(i)
+        end
+    end)
+    
+    UserInputService.InputEnded:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+            isDragging = false
+        end
+    end)
+end
+
+----------------------------------------------------
+-- MUSIC SYSTEM (THAI SONGS LIBRARY)
+----------------------------------------------------
+local CustomMusic = Instance.new("Sound")
+CustomMusic.Name = "AkashiCustomMusic"
+CustomMusic.Volume = 0.5
+CustomMusic.Looped = true
+CustomMusic.Parent = SoundService
+
+local ThaiSongs = {
+    {Name = "🎵 ธาตุทองซาวด์ (Youngohm)", Id = "rbxassetid://1423760888"},
+    {Name = "🎵 ทรงอย่างแบด (Paper Planes)", Id = "rbxassetid://11419080314"},
+    {Name = "🎵 คั่นกู (Bright Vachirawit)", Id = "rbxassetid://5141221762"},
+    {Name = "🎵 อ้าว (Atom Chanagun)", Id = "rbxassetid://6023424151"},
+    {Name = "🎵 พิง (Nont Tanont)", Id = "rbxassetid://8246833111"},
+    {Name = "🎵 ซ่อนกลิ่น (Palmy)", Id = "rbxassetid://6023424152"},
+    {Name = "🎵 ถ้าเราเจอกันอีก (Tilly Birds)", Id = "rbxassetid://7044432112"},
+    {Name = "🎵 หมอกหรือควัน (Bird Thongchai)", Id = "rbxassetid://6023424153"},
+    {Name = "🎵 วาดไว้ (BOWKYLION)", Id = "rbxassetid://9078652145"},
+    {Name = "🎵 รักแรก (Nont Tanont)", Id = "rbxassetid://1324213154"}
+}
+
+-- แสดงเพลงที่กำลังเล่นอยู่
+local NowPlayingLabel = Instance.new("TextLabel", MusicPage)
+NowPlayingLabel.Size = UDim2.new(1, -6, 0, 32)
+NowPlayingLabel.BackgroundColor3 = C_CONTAINER
+NowPlayingLabel.Text = " 🎧 กำลังเล่น: ปิดเพลงอยู่"
+NowPlayingLabel.TextColor3 = Color3.fromRGB(255, 220, 100)
+NowPlayingLabel.Font = Enum.Font.GothamBold
+NowPlayingLabel.TextSize = 11
+NowPlayingLabel.TextXAlignment = Enum.TextXAlignment.Left
+NowPlayingLabel.ZIndex = 13
+Instance.new("UICorner", NowPlayingLabel).CornerRadius = UDim.new(0, 6)
+
+local function playThaiSong(songData)
+    playClickSound()
+    CustomMusic:Stop()
+    CustomMusic.SoundId = songData.Id
+    CustomMusic:Play()
+    NowPlayingLabel.Text = " 🎧 กำลังเล่น: " .. songData.Name
+end
+
+local function stopThaiSong()
+    playClickSound()
+    CustomMusic:Stop()
+    NowPlayingLabel.Text = " 🎧 กำลังเล่น: ปิดเพลงอยู่"
+end
+
+-- ปุ่มหยุดเพลง
+local StopSongBtn = Instance.new("TextButton", MusicPage)
+StopSongBtn.Size = UDim2.new(1, -6, 0, 32)
+StopSongBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+StopSongBtn.Text = "⏹️ ปิดเสียงเพลงทั้งหมด"
+StopSongBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+StopSongBtn.Font = Enum.Font.GothamBold
+StopSongBtn.TextSize = 11
+StopSongBtn.ZIndex = 13
+Instance.new("UICorner", StopSongBtn).CornerRadius = UDim.new(0, 6)
+StopSongBtn.MouseButton1Click:Connect(stopThaiSong)
+
+-- สร้างปุ่มรายชื่อเพลงไทยทั้งหมดในลิสต์
+for _, song in ipairs(ThaiSongs) do
+    local SongBtn = Instance.new("TextButton", MusicPage)
+    SongBtn.Size = UDim2.new(1, -6, 0, 36)
+    SongBtn.BackgroundColor3 = C_CONTAINER
+    SongBtn.Text = song.Name
+    SongBtn.TextColor3 = C_TEXT
+    SongBtn.Font = Enum.Font.GothamSemibold
+    SongBtn.TextSize = 11
+    SongBtn.TextXAlignment = Enum.TextXAlignment.Left
+    SongBtn.ZIndex = 13
+    Instance.new("UICorner", SongBtn).CornerRadius = UDim.new(0, 6)
+    
+    local Padding = Instance.new("UIPadding", SongBtn)
+    Padding.PaddingLeft = UDim.new(0, 10)
+    
+    SongBtn.MouseButton1Click:Connect(function()
+        playThaiSong(song)
+    end)
+end
+
+CreateSlider(MusicPage, "Music Volume (ระดับเสียงเพลง)", 0, 100, 50, function(val)
+    CustomMusic.Volume = val / 100
+end)
+
+----------------------------------------------------
+-- SCRIPT LOGIC (FARM & RAISE & WORD)
+----------------------------------------------------
+local eA, eE, eF, eS, eJ, eH, eSelfH, eInvis, autoClick = false, false, false, false, false, false, false, false, false
+local fR, flySpd, aS, aJ, clickDelay, selfHSize = 300, 50, 60, 120, 0.1, 10
+local bG, bV = nil, nil
+
+local autoHarvest = false
+local autoPlant = false
+local autoSell = false
+local autoBuyTRexEgg = false
+local autoBuyGodzillaEgg = false
+local autoBuyKrakenEgg = false
+local autoBuyEnderDragonEgg = false
+local autoBuyBlazeEgg = false
+local autoBuyAlienEgg = false
+local autoBuyGnawbonesEgg = false
+local autoGetMeatFeed = false
+
+task.spawn(function()
+    while true do
+        if autoHarvest then
+            pcall(function()
+                for _, prompt in ipairs(workspace:GetDescendants()) do
+                    if prompt:IsA("ProximityPrompt") and (string.find(string.lower(prompt.ActionText), "collect") or string.find(string.lower(prompt.ActionText), "harvest") or string.find(string.lower(prompt.ObjectText), "crop")) then
+                        fireproximityprompt(prompt)
+                    end
+                end
+            end)
+        end
+        if autoPlant then
+            pcall(function()
+                for _, prompt in ipairs(workspace:GetDescendants()) do
+                    if prompt:IsA("ProximityPrompt") and string.find(string.lower(prompt.ActionText), "plant") then
+                        fireproximityprompt(prompt)
+                    end
+                end
+            end)
+        end
+        if autoSell then
+            pcall(function()
+                for _, prompt in ipairs(workspace:GetDescendants()) do
+                    if prompt:IsA("ProximityPrompt") and string.find(string.lower(prompt.ActionText), "sell") then
+                        fireproximityprompt(prompt)
+                    end
+                end
+            end)
+        end
+        if autoBuyTRexEgg then
+            pcall(function() ReplicatedStorage:WaitForChild("R_Server"):FireServer(unpack({"Get_EGG", "T_Rex"})) end)
+        end
+        if autoBuyGodzillaEgg then
+            pcall(function() ReplicatedStorage:WaitForChild("R_Server"):FireServer(unpack({"Get_EGG", "Godzilla"})) end)
+        end
+        if autoBuyKrakenEgg then
+            pcall(function() ReplicatedStorage:WaitForChild("R_Server"):FireServer(unpack({"Get_EGG", "Kraken"})) end)
+        end
+        if autoBuyEnderDragonEgg then
+            pcall(function() ReplicatedStorage:WaitForChild("R_Server"):FireServer(unpack({"Get_EGG", "Ender_Dragon"})) end)
+        end
+        if autoBuyBlazeEgg then
+            pcall(function() ReplicatedStorage:WaitForChild("R_Server"):FireServer(unpack({"Get_EGG", "Blaze"})) end)
+        end
+        if autoBuyAlienEgg then
+            pcall(function() ReplicatedStorage:WaitForChild("R_Server"):FireServer(unpack({"Get_EGG", "Alien"})) end)
+        end
+        if autoBuyGnawbonesEgg then
+            pcall(function() ReplicatedStorage:WaitForChild("R_Server"):FireServer(unpack({"Get_EGG", "Gnawbones"})) end)
+        end
+        if autoGetMeatFeed then
+            pcall(function() ReplicatedStorage:WaitForChild("R_Server"):FireServer(unpack({"Get_Feeds", "Meat"})) end)
+        end
+        task.wait(0.3)
+    end
+end)
+
+local autoAnswerWord = false
+local autoSendChatWord = true
+local wordTypeSpeed = 0.1
+local lastSubmitted = ""
+local WORD_DATABASE = {"APPLE", "BANANA", "CAT", "DOG", "ELEPHANT", "FLOWER", "GIRAFFE", "HOUSE", "ICE", "JUNGLE", "KANGAROO", "LION", "MONKEY", "NIGHT", "ORANGE", "PENGUIN", "QUEEN", "RABBIT", "SUN", "TREE"}
+
+local function sendChatMessage(msg)
+    pcall(function()
+        if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+            local generalChannel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+            if generalChannel then generalChannel:SendAsync(msg) end
+        else
+            ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents"):FindFirstChild("SayMessageRequest"):FireServer(msg, "All")
+        end
+    end)
+end
+
+local function scanAndSolveWord()
+    for _, gui in ipairs(PlayerGui:GetChildren()) do
+        if gui:IsA("ScreenGui") and gui.Enabled then
+            for _, label in ipairs(gui:GetDescendants()) do
+                if (label:IsA("TextLabel") or label:IsA("TextBox")) and label.Visible then
+                    local txt = label.Text
+                    if txt and #txt >= 1 and #txt <= 15 and not string.find(txt, " ") then
+                        local solution = txt .. "ING"
+                        if solution and solution ~= lastSubmitted then
+                            lastSubmitted = solution
+                            if label:IsA("TextBox") then label.Text = solution end
+                            if autoSendChatWord then
+                                sendChatMessage(solution)
+                            else
+                                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+                                task.wait(0.05)
+                                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+                            end
+                            return
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
+task.spawn(function()
+    while true do
+        if autoAnswerWord then scanAndSolveWord() end
+        task.wait(wordTypeSpeed)
+    end
+end)
+
+local function doEsp(ch, st)
+    local h = ch:FindFirstChild("AkashiESP")
+    if st and not h then 
+        h = Instance.new("Highlight", ch) 
+        h.Name = "AkashiESP" 
+        h.FillColor = C_RED 
+        h.OutlineColor = Color3.fromRGB(255,255,255) 
+        h.FillTransparency = 0.5 
+        h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    elseif not st and h then 
+        h:Destroy() 
+    end
+end
+
+local function fl()
+    local c = LocalPlayer.Character 
+    local hrp, hum = c and c:FindFirstChild("HumanoidRootPart"), c and c:FindFirstChildOfClass("Humanoid") 
+    if not hrp or not hum then return end
+    bG, bV = Instance.new("BodyGyro", hrp), Instance.new("BodyVelocity", hrp) 
+    bG.P, bG.maxTorque, bG.cframe = 9e4, Vector3.new(9e9,9e9,9e9), hrp.CFrame 
+    bV.velocity, bV.maxForce, hum.PlatformStand = Vector3.new(0,0.1,0), Vector3.new(9e9,9e9,9e9), true
+end
+
+local function noFl()
+    if bG then bG:Destroy() end 
+    if bV then bV:Destroy() end 
+    local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") 
+    if hum then hum.PlatformStand = false end
+end
+
+local function setCharInvis(state)
+    local char = LocalPlayer.Character
+    if not char then return end
+    for _, item in ipairs(char:GetDescendants()) do
+        if item:IsA("BasePart") or item:IsA("Decal") then
+            if item.Name ~= "HumanoidRootPart" or not state then
+                item.Transparency = state and 1 or 0
+            end
+        end
+    end
+end
+
+task.spawn(function()
+    while true do
+        if autoClick then
+            VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
+            task.wait(0.01)
+            VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
+        end
+        task.wait(clickDelay)
+    end
+end)
+
+----------------------------------------------------
+-- UI SETUP MENU ITEMS
+----------------------------------------------------
+
+-- FARMING TAB
+CreateToggle(FarmPage, "Auto Click (ออโต้คลิก)", function(val) autoClick = val end)
+CreateSlider(FarmPage, "Click Delay (ms)", 10, 500, 100, function(val) clickDelay = val / 1000 end)
+CreateToggle(FarmPage, "Invisibility (หายตัว)", function(val) eInvis = val setCharInvis(eInvis) end)
+CreateToggle(FarmPage, "Fly Mode (บิน)", function(val) eF = val if eF then fl() else noFl() end end)
+CreateToggle(FarmPage, "WalkSpeed (วิ่งเร็ว)", function(val) eS = val end)
+CreateToggle(FarmPage, "High Jump (กระโดดสูง)", function(val) eJ = val end)
+CreateToggle(FarmPage, "Self Hitbox (ตัวเราใหญ่)", function(val)
+    eSelfH = val
+    if not eSelfH then
+        local c = LocalPlayer.Character
+        local hrp = c and c:FindFirstChild("HumanoidRootPart")
+        if hrp then hrp.Size, hrp.Transparency, hrp.CanCollide = Vector3.new(2, 2, 1), 1, true end
+    end
+end)
+CreateSlider(FarmPage, "Self Hitbox Size", 2, 50, 10, function(val) selfHSize = val end)
+
+-- RAISE A FARM TAB
+CreateToggle(RaiseFarmPage, "Auto Harvest (เก็บผลผลิต)", function(val) autoHarvest = val end)
+CreateToggle(RaiseFarmPage, "Auto Plant (ปลูกพืชออโต้)", function(val) autoPlant = val end)
+CreateToggle(RaiseFarmPage, "Auto Sell (ขายของออโต้)", function(val) autoSell = val end)
+CreateToggle(RaiseFarmPage, "Auto Get Feeds Meat (ซื้ออาหาร Meat)", function(val) autoGetMeatFeed = val end)
+CreateToggle(RaiseFarmPage, "Auto Buy T-Rex Egg (สุ่มไข่ T-Rex)", function(val) autoBuyTRexEgg = val end)
+CreateToggle(RaiseFarmPage, "Auto Buy Godzilla Egg (สุ่มไข่ Godzilla)", function(val) autoBuyGodzillaEgg = val end)
+CreateToggle(RaiseFarmPage, "Auto Buy Kraken Egg (สุ่มไข่ Kraken)", function(val) autoBuyKrakenEgg = val end)
+CreateToggle(RaiseFarmPage, "Auto Buy Ender Dragon Egg (สุ่มไข่ Ender Dragon)", function(val) autoBuyEnderDragonEgg = val end)
+CreateToggle(RaiseFarmPage, "Auto Buy Blaze Egg (สุ่มไข่ Blaze)", function(val) autoBuyBlazeEgg = val end)
+CreateToggle(RaiseFarmPage, "Auto Buy Alien Egg (สุ่มไข่เอเลี่ยน)", function(val) autoBuyAlienEgg = val end)
+CreateToggle(RaiseFarmPage, "Auto Buy Gnawbones Egg (สุ่มไข่ Gnawbones)", function(val) autoBuyGnawbonesEgg = val end)
+
+-- VISUALS TAB
+CreateToggle(VisualsPage, "Aimbot (ล็อกเป้า)", function(val) eA = val end)
+CreateToggle(VisualsPage, "Player ESP (มองทะลุ)", function(val)
+    eE = val
+    if not eE then 
+        for _, p in ipairs(Players:GetPlayers()) do 
+            if p.Character then doEsp(p.Character, false) end 
+        end 
+    end
+end)
+CreateSlider(VisualsPage, "Aimbot FOV Range", 1, 500, 300, function(val) fR = val end)
+CreateToggle(VisualsPage, "Big Hitbox (คนอื่นใหญ่)", function(val)
+    eH = val
+    if not eH then 
+        for _, p in ipairs(Players:GetPlayers()) do 
+            if p ~= LocalPlayer and p.Character then 
+                local h = p.Character:FindFirstChild("HumanoidRootPart") 
+                if h then h.Size, h.Transparency, h.CanCollide = Vector3.new(2,2,1), 1, true end 
+            end 
+        end 
+    end
+end)
+
+-- FINISH THE WORD TAB
+CreateToggle(WordPage, "Auto Finish Word (แก้คำออโต้)", function(val) autoAnswerWord = val end)
+CreateToggle(WordPage, "Auto Send To Chat (ส่งลงแชท)", function(val) autoSendChatWord = val end)
+CreateSlider(WordPage, "Solve Speed (ms)", 10, 1000, 100, function(val) wordTypeSpeed = val / 1000 end)
+
+----------------------------------------------------
+-- MAIN LOOP
+----------------------------------------------------
+RunService.RenderStepped:Connect(function()
+    Cam = workspace.CurrentCamera
+    local c = LocalPlayer.Character 
+    local hum = c and c:FindFirstChildOfClass("Humanoid")
+    local myHrp = c and c:FindFirstChild("HumanoidRootPart")
+    
+    if hum then 
+        hum.WalkSpeed = eS and aS or 16 
+        if eJ then 
+            if hum.UseJumpPower then hum.JumpPower = aJ else hum.JumpHeight = aJ/2 end 
+        else 
+            if hum.UseJumpPower then hum.JumpPower = 50 else hum.JumpHeight = 7.2 end 
+        end 
+    end
+
+    if eInvis then setCharInvis(true) end
+
+    if eSelfH and myHrp then
+        myHrp.Size = Vector3.new(selfHSize, selfHSize, selfHSize)
+        myHrp.Transparency = 0.7
+        myHrp.BrickColor = BrickColor.new("Bright red")
+        myHrp.CanCollide = false
+    end
+    
+    if eA then
+        local cl, sd = nil, fR
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") and player.Character:FindFirstChildOfClass("Humanoid") and player.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
+                local screenPos, onScreen = Cam:WorldToViewportPoint(player.Character.Head.Position)
+                if onScreen then 
+                    local distance = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(Cam.ViewportSize.X / 2, Cam.ViewportSize.Y / 2)).Magnitude 
+                    if distance < sd then 
+                        sd = distance 
+                        cl = player.Character.Head 
+                    end 
+                end
+            end
+        end
+        if cl then Cam.CFrame = CFrame.new(Cam.CFrame.Position, cl.Position) end
+    end
+    
+    if eE then 
+        for _, player in ipairs(Players:GetPlayers()) do 
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChildOfClass("Humanoid") and player.Character:FindFirstChildOfClass("Humanoid").Health > 0 then 
+                doEsp(player.Character, true) 
+            end 
+        end 
+    end
+    
+    if eH then
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character then 
+                local hrp = player.Character:FindFirstChild("HumanoidRootPart") 
+                if hrp and player.Character:FindFirstChildOfClass("Humanoid") and player.Character:FindFirstChildOfClass("Humanoid").Health > 0 then 
+                    hrp.Size, hrp.Transparency, hrp.BrickColor, hrp.CanCollide = Vector3.new(10, 10, 10), 0.7, BrickColor.new("Really red"), false 
+                end 
+            end
+        end
+    end
+    
+    if eF and bV and bG and c and c:FindFirstChild("HumanoidRootPart") and hum then 
+        bG.cframe = Cam.CFrame 
+        local md = hum.MoveDirection 
+        bV.velocity = md.Magnitude > 0 and Cam.CFrame:VectorToWorldSpace(Vector3.new(md.X, 0, md.Z).Unit * flySpd) or Vector3.new(0, 0.1, 0) 
+    end
+end)
+
+LocalPlayer.CharacterAdded:Connect(function() 
+    if eF then task.wait(1) fl() end 
+    if eInvis then task.wait(0.5) setCharInvis(true) end
+end)
+
+----------------------------------------------------
+-- EXECUTE LOADING (23 SECONDS)
+----------------------------------------------------
+task.spawn(function()
+    if LoadingMusic.IsLoaded then
+        LoadingMusic:Play()
+    else
+        LoadingMusic.Loaded:Wait()
+        LoadingMusic:Play()
+    end
+    
+    local duration = 23
+    local steps = 100
+    for i = 1, steps do
+        local progress = i / steps
+        BarFill.Size = UDim2.new(progress, 0, 1, 0)
+        LoadingText.Text = "Loading AKASI HUH... (" .. math.floor(progress * 100) .. "%)"
+        task.wait(duration / steps)
+    end
+    
+    LoadingMusic:Stop()
+    TweenService:Create(LoadingFrame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(LoadingImage, TweenInfo.new(0.5), {ImageTransparency = 1}):Play()
+    TweenService:Create(ImageContainer, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(ImageStroke, TweenInfo.new(0.5), {Transparency = 1}):Play()
+    TweenService:Create(LoadingText, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+    TweenService:Create(DiscordText, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+    TweenService:Create(BarBackground, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(BarFill, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+    
+    task.wait(0.5)
+    LoadingFrame:Destroy()
+    
+    ToggleBtn.Visible = true
+    Main.Visible = true
+    playClickSound()
+end)
